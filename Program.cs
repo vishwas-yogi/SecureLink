@@ -1,10 +1,12 @@
 using FileUploader.Interfaces;
+using FileUploader.Repositories;
 using FileUploader.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddSingleton<IFileUploadService, FileUploadService>();
+builder.Services.AddScoped<IFileUploadRepository, LocalStoreRepository>();
 
 builder.Services.AddControllers();
 

@@ -4,10 +4,12 @@ using Microsoft.Net.Http.Headers;
 
 namespace FileUploader.Services;
 
-public class FileUploadService(ILogger<FileUploadService> logger) : IFileUploadService
+public class FileUploadService(IFileUploadRepository repository, ILogger<FileUploadService> logger)
+    : IFileUploadService
 {
     private readonly string outputFileName = Guid.NewGuid().ToString();
     private readonly ILogger<FileUploadService> _logger = logger;
+    private readonly IFileUploadRepository _repository = repository;
 
     public async Task<string> UploadFile(string boundary, Stream uploadedFileStream)
     {
@@ -35,26 +37,11 @@ public class FileUploadService(ILogger<FileUploadService> logger) : IFileUploadS
             {
                 var originalFileName = contentDispositionHeader.FileName.Value;
                 var extension = Path.GetExtension(originalFileName);
+                var finalOutputFileName = Path.ChangeExtension(outputFileName, extension);
 
                 _logger.LogInformation($"Processing file: {originalFileName}");
 
-                // Construct file path and delete the file if it already exists
-                var finalOutputFileName = Path.ChangeExtension(outputFileName, extension);
-                outputFilePath = Path.Combine(GetOutputDir(), finalOutputFileName);
-                RemoveFileIfExists(outputFilePath);
-
-                // Constuct FileStream for the output file
-                var options = new FileStreamOptions
-                {
-                    Mode = FileMode.Create,
-                    Access = FileAccess.Write,
-                    Options = FileOptions.Asynchronous,
-                    Share = FileShare.None,
-                };
-
-                using FileStream outputStream = new(outputFilePath, options);
-
-                await content.CopyToAsync(outputStream);
+                await _repository.UploadFile(content, finalOutputFileName);
                 totalBytesRead += content.Length;
             }
             // Else handle the metadata
@@ -73,24 +60,5 @@ public class FileUploadService(ILogger<FileUploadService> logger) : IFileUploadS
         _logger.LogInformation($"File upload completed. Total bytes read: {totalBytesRead} bytes");
 
         return outputFilePath;
-    }
-
-    private void RemoveFileIfExists(string filePath)
-    {
-        if (File.Exists(filePath))
-        {
-            File.Delete(filePath);
-            _logger.LogInformation($"Deleted file: {filePath}");
-        }
-    }
-
-    private static string GetOutputDir()
-    {
-        string outDir = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
-        if (!Directory.Exists(outDir))
-        {
-            Directory.CreateDirectory(outDir);
-        }
-        return outDir;
     }
 }
