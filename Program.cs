@@ -4,7 +4,7 @@ using FileUploader.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddSingleton<IFileManagerService, FileManagerService>();
+builder.Services.AddSingleton<IFileUploadService, FileUploadService>();
 
 builder.Services.AddControllers();
 

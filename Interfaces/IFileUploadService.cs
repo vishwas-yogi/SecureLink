@@ -1,6 +1,6 @@
 namespace FileUploader.Interfaces;
 
-public interface IFileManagerService
+public interface IFileUploadService
 {
     public Task<string> UploadFile(string boundary, Stream inputStream);
 }
