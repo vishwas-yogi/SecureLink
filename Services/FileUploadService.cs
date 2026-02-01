@@ -4,28 +4,16 @@ using Microsoft.Net.Http.Headers;
 
 namespace FileUploader.Services;
 
-public class FileManagerService(ILogger<FileManagerService> logger) : IFileManagerService
+public class FileUploadService(IFileUploadRepository repository, ILogger<FileUploadService> logger)
+    : IFileUploadService
 {
-    private const string outputFileName = "test.txt";
-    private readonly ILogger<FileManagerService> _logger = logger;
+    private readonly ILogger<FileUploadService> _logger = logger;
+    private readonly IFileUploadRepository _repository = repository;
 
     public async Task<string> UploadFile(string boundary, Stream uploadedFileStream)
     {
-        // Construct file path and delete the file if it already exists
-        string outputFilePath = Path.Combine(Directory.GetCurrentDirectory(), outputFileName);
-        RemoveFileIfExists(outputFilePath);
-
-        // Constuct FileStream for the output file
-        var options = new FileStreamOptions
-        {
-            Mode = FileMode.Create,
-            Access = FileAccess.Write,
-            Options = FileOptions.Asynchronous,
-            Share = FileShare.None,
-        };
-
-        using FileStream outputStream = new(outputFilePath, options);
-
+        string outputFileName = Guid.NewGuid().ToString();
+        string outputFilePath = "";
         var reader = new MultipartReader(boundary, uploadedFileStream);
         MultipartSection? section;
         long totalBytesRead = 0;
@@ -47,11 +35,13 @@ public class FileManagerService(ILogger<FileManagerService> logger) : IFileManag
             // If it is a file write it to output file stream
             if (contentDispositionHeader.IsFileDisposition())
             {
-                _logger.LogInformation(
-                    $"Processing file: ${contentDispositionHeader.FileName.Value}"
-                );
+                var originalFileName = contentDispositionHeader.FileName.Value;
+                var extension = Path.GetExtension(originalFileName);
+                var finalOutputFileName = Path.ChangeExtension(outputFileName, extension);
 
-                await content.CopyToAsync(outputStream);
+                _logger.LogInformation($"Processing file: {originalFileName}");
+
+                outputFilePath = await _repository.UploadFile(content, finalOutputFileName);
                 totalBytesRead += content.Length;
             }
             // Else handle the metadata
@@ -70,14 +60,5 @@ public class FileManagerService(ILogger<FileManagerService> logger) : IFileManag
         _logger.LogInformation($"File upload completed. Total bytes read: {totalBytesRead} bytes");
 
         return outputFilePath;
-    }
-
-    private void RemoveFileIfExists(string filePath)
-    {
-        if (File.Exists(filePath))
-        {
-            File.Delete(filePath);
-            _logger.LogInformation($"Deleted file: {filePath}");
-        }
     }
 }
