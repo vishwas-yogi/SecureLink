@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddSingleton<IFileUploadService, FileUploadService>();
+// TODO: Add an S3 storage service as well.
 builder.Services.AddScoped<IFileUploadRepository, LocalStoreRepository>();
 
 builder.Services.AddControllers();

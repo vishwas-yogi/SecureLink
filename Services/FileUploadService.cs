@@ -7,12 +7,12 @@ namespace FileUploader.Services;
 public class FileUploadService(IFileUploadRepository repository, ILogger<FileUploadService> logger)
     : IFileUploadService
 {
-    private readonly string outputFileName = Guid.NewGuid().ToString();
     private readonly ILogger<FileUploadService> _logger = logger;
     private readonly IFileUploadRepository _repository = repository;
 
     public async Task<string> UploadFile(string boundary, Stream uploadedFileStream)
     {
+        string outputFileName = Guid.NewGuid().ToString();
         string outputFilePath = "";
         var reader = new MultipartReader(boundary, uploadedFileStream);
         MultipartSection? section;
@@ -41,7 +41,7 @@ public class FileUploadService(IFileUploadRepository repository, ILogger<FileUpl
 
                 _logger.LogInformation($"Processing file: {originalFileName}");
 
-                await _repository.UploadFile(content, finalOutputFileName);
+                outputFilePath = await _repository.UploadFile(content, finalOutputFileName);
                 totalBytesRead += content.Length;
             }
             // Else handle the metadata
