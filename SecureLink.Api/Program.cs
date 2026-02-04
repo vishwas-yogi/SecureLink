@@ -1,7 +1,10 @@
+using Microsoft.AspNetCore.Http.Features;
 using SecureLink.Core.Contracts;
 using SecureLink.Core.Services;
 using SecureLink.Infrastructure.Repositories;
 using SecureLink.Infrastructure.Services;
+
+const long maxFileLimit = 5L * 1024 * 1024 * 1024; // 5 GB
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +15,17 @@ builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 builder.Services.AddScoped<FileUploadValidator>();
 
 // TODO: Add an S3 storage service as well.
-builder.Services.AddScoped<IFileUploadRepository, LocalStoreRepository>();
+builder.Services.AddScoped<IFileRepository, LocalStoreRepository>();
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = maxFileLimit + (10 * 1024 * 1024); // 5GB + 10MB buffer
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = maxFileLimit;
+});
 
 builder.Services.AddControllers();
 
