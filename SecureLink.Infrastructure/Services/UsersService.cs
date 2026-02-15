@@ -1,37 +1,114 @@
 using Microsoft.Extensions.Logging;
 using SecureLink.Core.Contracts;
 using SecureLink.Infrastructure.Contracts;
+using SecureLink.Infrastructure.Helpers;
 
 namespace SecureLink.Infrastructure.Services;
 
-public class UsersService(IUsersRepository usersRepository, ILogger<UsersService> logger)
-    : IUsersService
+public class UsersService(
+    IUsersRepository usersRepository,
+    IUsersValidator validator,
+    ILogger<UsersService> logger
+) : IUsersService
 {
-    private IUsersRepository _usersRepository = usersRepository;
-    private ILogger<UsersService> _logger = logger;
+    private readonly IUsersRepository _usersRepository = usersRepository;
+    private readonly IUsersValidator _validator = validator;
+    private readonly ILogger<UsersService> _logger = logger;
 
-    public Task<ServiceResult<UserResponse, UserErrorDetails>> Create(CreateUserRequest request)
+    public async Task<ServiceResult<UserResponse, UserErrorDetails>> Create(
+        CreateUserRequest request
+    )
     {
-        throw new NotImplementedException();
+        _logger.LogInformation("Create user request started with request: {request}", request);
+
+        var validationResult = await _validator.Validate(request);
+        if (!validationResult.IsValid)
+        {
+            return ServiceResult<UserResponse, UserErrorDetails>.ValidationError(
+                validationResult.Error!
+            );
+        }
+
+        var createdUser = await _usersRepository.Create(
+            new CreateUserRepoRequest
+            {
+                Id = Guid.NewGuid(),
+                Name = request.Name,
+                Username = request.Username,
+                Email = request.Email,
+                PasswordHash = request.PasswordHash,
+            }
+        );
+
+        return ServiceResult<UserResponse, UserErrorDetails>.Success(createdUser);
     }
 
-    public Task<ServiceResult<ErrorDetails>> Delete(DeleteUserRequest request)
+    public async Task<ServiceResult<ErrorDetails>> Delete(DeleteUserRequest request)
     {
-        throw new NotImplementedException();
+        _logger.LogInformation("Delete user request started for request: {request}", request);
+        var isDeleted = await _usersRepository.Delete(new DeleteUserRepoRequest(request.Id));
+        return isDeleted
+            ? ServiceResult<ErrorDetails>.Success()
+            : ServiceResult<ErrorDetails>.NotFound(new ErrorDetails { Message = "User not found" });
     }
 
-    public Task<ServiceResult<UserResponse, ErrorDetails>> Get(GetUserRequest request)
+    public async Task<ServiceResult<UserResponse, ErrorDetails>> Get(GetUserRequest request)
     {
-        throw new NotImplementedException();
+        _logger.LogInformation("Get user request started for request: {request}", request);
+        var user = await _usersRepository.GetById(request.Id);
+
+        if (user is null)
+        {
+            return ServiceResult<UserResponse, ErrorDetails>.NotFound(
+                new ErrorDetails { Message = "User not found" }
+            );
+        }
+
+        _logger.LogInformation("Get user request completed with response: {response}", user);
+
+        return ServiceResult<UserResponse, ErrorDetails>.Success(user.ToDto());
     }
 
-    public Task<ServiceResult<List<UserResponse>, ErrorDetails>> List(ListUsersRequest request)
+    public async Task<ServiceResult<List<UserResponse>, ErrorDetails>> List(
+        ListUsersRequest request
+    )
     {
-        throw new NotImplementedException();
+        _logger.LogInformation("List users request started");
+        var users = await _usersRepository.List();
+        _logger.LogInformation("List user request completed with response: {response}", users);
+        return ServiceResult<List<UserResponse>, ErrorDetails>.Success(users);
     }
 
-    public Task<ServiceResult<UserResponse, UserErrorDetails>> Update(UpdateUserRequest request)
+    public async Task<ServiceResult<UserResponse, UserErrorDetails>> Update(
+        UpdateUserRequest request
+    )
     {
-        throw new NotImplementedException();
+        _logger.LogInformation("Update uesr request started for request: {request}", request);
+
+        var existingUser = await _usersRepository.GetById(request.Id);
+        if (existingUser is null)
+        {
+            return ServiceResult<UserResponse, UserErrorDetails>.NotFound(
+                new UserErrorDetails { Message = "User not found" }
+            );
+        }
+
+        var validationResult = await _validator.Validate(request, existingUser);
+        if (!validationResult.IsValid)
+        {
+            return ServiceResult<UserResponse, UserErrorDetails>.ValidationError(
+                validationResult.Error!
+            );
+        }
+
+        existingUser!.Name = request.Name ?? existingUser.Name;
+        existingUser.Username = request.Username ?? existingUser.Username;
+        existingUser.Email = request.Email ?? existingUser.Email;
+
+        var response = await _usersRepository.Update(
+            new UpdateUserRepoRequest { UpdatedUser = existingUser }
+        );
+
+        return ServiceResult<UserResponse, UserErrorDetails>.Success(response);
     }
 }

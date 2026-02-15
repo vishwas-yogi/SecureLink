@@ -24,6 +24,11 @@ public class ServiceResult<TError>
     {
         return new ServiceResult<TError> { Status = ResponseStatus.ValidationError, Error = error };
     }
+
+    public static ServiceResult<TError> NotFound(TError error)
+    {
+        return new ServiceResult<TError> { Status = ResponseStatus.NotFound, Error = error };
+    }
 }
 
 // Type when we need to return data as well
@@ -43,5 +48,10 @@ public class ServiceResult<TData, TError> : ServiceResult<TError>
             Status = ResponseStatus.ValidationError,
             Error = error,
         };
+    }
+
+    public static new ServiceResult<TData, TError> NotFound(TError error)
+    {
+        return new ServiceResult<TData, TError> { Status = ResponseStatus.NotFound, Error = error };
     }
 }

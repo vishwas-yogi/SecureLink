@@ -1,5 +1,6 @@
 using System.Net.Mail;
 using SecureLink.Core.Contracts;
+using SecureLink.Core.Entities;
 using SecureLink.Infrastructure.Contracts;
 
 namespace SecureLink.Infrastructure.Services;
@@ -7,7 +8,7 @@ namespace SecureLink.Infrastructure.Services;
 public class UsersValidator(IUsersRepository usersRepository) : IUsersValidator
 {
     private readonly IUsersRepository _usersRepo = usersRepository;
-    private UserResponse? _existingUser = null;
+    private User? _existingUser = null;
     private UserErrorDetails errors = new();
 
     public async Task<ValidationResult<UserErrorDetails>> Validate(CreateUserRequest request)
@@ -17,7 +18,7 @@ public class UsersValidator(IUsersRepository usersRepository) : IUsersValidator
 
     public async Task<ValidationResult<UserErrorDetails>> Validate(
         UpdateUserRequest request,
-        UserResponse existingUser
+        User existingUser
     )
     {
         _existingUser = existingUser;
