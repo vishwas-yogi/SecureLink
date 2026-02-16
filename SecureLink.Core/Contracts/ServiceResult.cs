@@ -20,6 +20,11 @@ public class ServiceResult<TError>
         return new ServiceResult<TError> { Status = ResponseStatus.Success };
     }
 
+    public static ServiceResult<TError> Deleted()
+    {
+        return new ServiceResult<TError> { Status = ResponseStatus.Deleted };
+    }
+
     public static ServiceResult<TError> ValidationError(TError error)
     {
         return new ServiceResult<TError> { Status = ResponseStatus.ValidationError, Error = error };
@@ -39,6 +44,16 @@ public class ServiceResult<TData, TError> : ServiceResult<TError>
     public static ServiceResult<TData, TError> Success(TData data)
     {
         return new ServiceResult<TData, TError> { Status = ResponseStatus.Success, Data = data };
+    }
+
+    public static ServiceResult<TData, TError> Created(TData data)
+    {
+        return new ServiceResult<TData, TError> { Status = ResponseStatus.Created, Data = data };
+    }
+
+    public static ServiceResult<TData, TError> Deleted(TData data)
+    {
+        return new ServiceResult<TData, TError> { Status = ResponseStatus.Deleted, Data = data };
     }
 
     public static new ServiceResult<TData, TError> ValidationError(TError error)

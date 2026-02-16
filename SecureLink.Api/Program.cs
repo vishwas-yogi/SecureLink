@@ -19,6 +19,10 @@ builder.Services.AddScoped<FileValidator>();
 builder.Services.AddScoped<IFileRepository, LocalStoreRepository>();
 builder.Services.Configure<DapperOptions>(builder.Configuration.GetSection("Dapper"));
 builder.Services.AddSingleton<IDapperContext, DapperContext>();
+
+// User related services
+builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddScoped<IUsersValidator, UsersValidator>();
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 
 builder.WebHost.ConfigureKestrel(options =>
