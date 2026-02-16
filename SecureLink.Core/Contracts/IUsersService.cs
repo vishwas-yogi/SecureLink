@@ -6,5 +6,5 @@ public interface IUsersService
     Task<ServiceResult<UserResponse, ErrorDetails>> Get(GetUserRequest request);
     Task<ServiceResult<UserResponse, UserErrorDetails>> Create(CreateUserRequest request);
     Task<ServiceResult<UserResponse, UserErrorDetails>> Update(UpdateUserRequest request);
-    Task<ServiceResult<ErrorDetails>> Delete(DeleteUserRequest request);
+    Task<ServiceResult<string, ErrorDetails>> Delete(DeleteUserRequest request);
 }

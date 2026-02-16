@@ -22,7 +22,13 @@ public class UsersValidator(IUsersRepository usersRepository) : IUsersValidator
     )
     {
         _existingUser = existingUser;
-        return await Validate(new ValidationRequest(request.Username, request.Name, request.Email));
+        return await Validate(
+            new ValidationRequest(
+                request.Username ?? existingUser.Username,
+                request.Name ?? existingUser.Name,
+                request.Email ?? existingUser.Email
+            )
+        );
     }
 
     private async Task ValidateUsername(string? username)

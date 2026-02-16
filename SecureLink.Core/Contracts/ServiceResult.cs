@@ -51,9 +51,14 @@ public class ServiceResult<TData, TError> : ServiceResult<TError>
         return new ServiceResult<TData, TError> { Status = ResponseStatus.Created, Data = data };
     }
 
-    public static ServiceResult<TData, TError> Deleted(TData data)
+    public static ServiceResult<TData, TError> Deleted(TData? data, TError? error)
     {
-        return new ServiceResult<TData, TError> { Status = ResponseStatus.Deleted, Data = data };
+        return new ServiceResult<TData, TError>
+        {
+            Status = ResponseStatus.Deleted,
+            Data = data,
+            Error = error,
+        };
     }
 
     public static new ServiceResult<TData, TError> ValidationError(TError error)

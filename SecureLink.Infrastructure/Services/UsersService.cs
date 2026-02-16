@@ -43,13 +43,15 @@ public class UsersService(
         return ServiceResult<UserResponse, UserErrorDetails>.Created(createdUser);
     }
 
-    public async Task<ServiceResult<ErrorDetails>> Delete(DeleteUserRequest request)
+    public async Task<ServiceResult<string, ErrorDetails>> Delete(DeleteUserRequest request)
     {
         _logger.LogInformation("Delete user request started for request: {request}", request);
         var isDeleted = await _usersRepository.Delete(new DeleteUserRepoRequest(request.Id));
         return isDeleted
-            ? ServiceResult<ErrorDetails>.Deleted()
-            : ServiceResult<ErrorDetails>.NotFound(new ErrorDetails { Message = "User not found" });
+            ? ServiceResult<string, ErrorDetails>.Deleted(request.Id.ToString(), null)
+            : ServiceResult<string, ErrorDetails>.NotFound(
+                new ErrorDetails { Message = "User not found" }
+            );
     }
 
     public async Task<ServiceResult<UserResponse, ErrorDetails>> Get(GetUserRequest request)

@@ -20,13 +20,13 @@ public class UsersRepository(IDapperContext dapperContext)
         """;
 
     private const string _selectColumns = """
-                users.id,
-                users.name,
-                users.username,
-                users.email,
-                users.password_hash,
-                users.created_at,
-                users.last_modified_at
+            users.id,
+            users.name,
+            users.username,
+            users.email,
+            users.password_hash,
+            users.created_at,
+            users.last_modified_at
         """;
 
     public async Task<UserResponse> Create(CreateUserRepoRequest request)
@@ -47,6 +47,7 @@ public class UsersRepository(IDapperContext dapperContext)
                     @Id,
                     @Name,
                     @Username,
+                    @Email,
                     @PasswordHash,
                     CURRENT_TIMESTAMP,
                     CURRENT_TIMESTAMP
@@ -59,6 +60,7 @@ public class UsersRepository(IDapperContext dapperContext)
             request.Id,
             request.Name,
             request.Username,
+            request.Email,
             request.PasswordHash,
         };
 
@@ -101,7 +103,7 @@ public class UsersRepository(IDapperContext dapperContext)
 
     public async Task<List<UserResponse>> List()
     {
-        var sql = $"SELECT ${_selectColumns} FROM users;";
+        var sql = $"SELECT {_selectColumns} FROM users;";
 
         using var connection = DbContext.CreateConnection();
         var users = await connection.QueryAsync<UserResponse>(sql);
@@ -123,6 +125,7 @@ public class UsersRepository(IDapperContext dapperContext)
 
         var variables = new
         {
+            request.UpdatedUser.Id,
             request.UpdatedUser.Name,
             request.UpdatedUser.Username,
             request.UpdatedUser.Email,
