@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SecureLink.Core.Contracts;
+using SecureLink.Core.Entities;
 using SecureLink.Infrastructure.Contracts;
 
 namespace SecureLink.Infrastructure.Services;
@@ -79,7 +80,7 @@ public class AuthService(
             if (error.IsUserMismatch)
             {
                 var errorMsg =
-                    "Might be a security breach. User: {userId} used a refresh token of different user";
+                    $"Might be a security breach. User: {request.UserId} used a refresh token of different user";
                 error.Message = errorMsg;
                 _logger.LogCritical("{message}", errorMsg);
 
@@ -101,12 +102,6 @@ public class AuthService(
         RefreshTokensRequest request
     )
     {
-        var userResponse = await _usersService.Get(new GetUserRequest(request.UserId));
-        if (!userResponse.IsSuccess)
-            return ServiceResult<LoginResponse?, RefreshTokenErrorDetails>.Unauthorized(
-                new RefreshTokenErrorDetails { Message = "Invalid user" }
-            );
-
         // 1. Refresh token is revoked: Security breach => looutFromAllDevices. Return error.
         // 2. Refresh token is user mismatched: Potential theft => logout. Return error.
         // Although in this case, as this endpoint doesn't need authorization so we rely on the request's payload for userId
@@ -135,7 +130,7 @@ public class AuthService(
             if (error.IsUserMismatch)
             {
                 errorMsg =
-                    "Might be a security breach. User: {userId} used a refresh token of different user";
+                    $"Might be a security breach. User: {request.UserId} used a refresh token of different user";
                 error.Message = errorMsg;
                 _logger.LogCritical("{message}", errorMsg);
 
@@ -152,7 +147,17 @@ public class AuthService(
                 await _tokenService.RevokeToken(request.RefreshToken);
                 return ServiceResult<LoginResponse?, RefreshTokenErrorDetails>.Unauthorized(error);
             }
+
+            return ServiceResult<LoginResponse?, RefreshTokenErrorDetails>.Unauthorized(
+                new RefreshTokenErrorDetails { Message = "Invalid refresh token" }
+            );
         }
+
+        var userResponse = await _usersService.Get(new GetUserRequest(request.UserId));
+        if (!userResponse.IsSuccess)
+            return ServiceResult<LoginResponse?, RefreshTokenErrorDetails>.Unauthorized(
+                new RefreshTokenErrorDetails { Message = "Invalid user" }
+            );
 
         var newAccessToken = _tokenService.GenerateAccessToken(request.UserId);
         var newRefreshToken = await _tokenService.GenerateRefreshToken(request.UserId);
@@ -174,6 +179,13 @@ public class AuthService(
     {
         var passwordValidation = _authValidator.ValidatePassword(request.Password);
 
+        if (!passwordValidation.IsValid)
+        {
+            return ServiceResult<bool, UserErrorDetails>.BadRequest(
+                new UserErrorDetails { PasswordError = passwordValidation.Error!.Message }
+            );
+        }
+
         var response = await _usersService.Create(
             new CreateUserRequest
             {
@@ -186,9 +198,6 @@ public class AuthService(
 
         if (!response.IsSuccess)
         {
-            if (!passwordValidation.IsValid)
-                response.Error!.Password = passwordValidation.Error!.Message;
-
             return ServiceResult<bool, UserErrorDetails>.UnexpectedError(response.Error!);
         }
 

@@ -67,7 +67,12 @@ public class TokenService(
             Value = token,
             ExpiresAt = DateTimeOffset.UtcNow.AddHours(_jwtSettings.RefreshTokenExpirationInHours),
         };
-        await PersistToken(refreshToken);
+        var persisted = await PersistToken(refreshToken);
+        if (!persisted)
+        {
+            _logger.LogError("Failed to persist refresh token for user {UserId}", userId);
+            throw new InvalidOperationException("Failed to persist refresh token.");
+        }
 
         return token;
     }

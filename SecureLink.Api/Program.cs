@@ -102,6 +102,8 @@ if (app.Environment.IsDevelopment() || args.Contains("--migrate"))
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();

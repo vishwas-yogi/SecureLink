@@ -6,14 +6,13 @@ namespace SecureLink.Api.Controllers;
 
 [ApiController]
 [Route("auth")]
-public class AuthController(IAuthService authService, ITokenService tokenService) : ControllerBase
+public class AuthController(IAuthService authService) : ControllerBase
 {
-    public readonly ITokenService _tokenService = tokenService;
-    public readonly IAuthService _authService = authService;
+    private readonly IAuthService _authService = authService;
 
     [HttpPost]
     [Route("login")]
-    public async Task<ActionResult<string>> Login([FromBody] LoginApiRequest request)
+    public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginApiRequest request)
     {
         var response = await _authService.Login(
             new LoginRequest { Username = request.Username, Password = request.Password }
