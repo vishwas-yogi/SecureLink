@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using SecureLink.Core.Contracts;
+using SecureLink.Core.Entities;
 using SecureLink.Infrastructure.Contracts;
 using SecureLink.Infrastructure.Helpers;
 
@@ -75,6 +76,26 @@ public class UsersService(
         );
 
         return ServiceResult<UserResponse, ErrorDetails>.Success(user.ToDto());
+    }
+
+    public async Task<ServiceResult<User, ErrorDetails>> Get(GetUserByUsernameReq request)
+    {
+        _logger.LogInformation("Get user request started for request: {request}", request);
+        var user = await _usersRepository.GetByUsername(request.Username);
+
+        if (user is null)
+        {
+            return ServiceResult<User, ErrorDetails>.NotFound(
+                new ErrorDetails { Message = "User not found" }
+            );
+        }
+
+        _logger.LogInformation(
+            "Get user request completed with response: {response}",
+            user.ToDto()
+        );
+
+        return ServiceResult<User, ErrorDetails>.Success(user);
     }
 
     public async Task<ServiceResult<List<UserResponse>, ErrorDetails>> List(
