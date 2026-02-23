@@ -34,6 +34,21 @@ public class ServiceResult<TError>
     {
         return new ServiceResult<TError> { Status = ResponseStatus.NotFound, Error = error };
     }
+
+    public static ServiceResult<TError> BadRequest(TError error)
+    {
+        return new ServiceResult<TError> { Status = ResponseStatus.BadRequest, Error = error };
+    }
+
+    public static ServiceResult<TError> UnexpectedError(TError error)
+    {
+        return new ServiceResult<TError> { Status = ResponseStatus.UnexpectedError, Error = error };
+    }
+
+    public static ServiceResult<TError> Unauthorized(TError error)
+    {
+        return new ServiceResult<TError> { Status = ResponseStatus.Unauthorized, Error = error };
+    }
 }
 
 // Type when we need to return data as well
@@ -73,5 +88,32 @@ public class ServiceResult<TData, TError> : ServiceResult<TError>
     public static new ServiceResult<TData, TError> NotFound(TError error)
     {
         return new ServiceResult<TData, TError> { Status = ResponseStatus.NotFound, Error = error };
+    }
+
+    public static new ServiceResult<TData, TError> BadRequest(TError error)
+    {
+        return new ServiceResult<TData, TError>
+        {
+            Status = ResponseStatus.BadRequest,
+            Error = error,
+        };
+    }
+
+    public static new ServiceResult<TData, TError> UnexpectedError(TError error)
+    {
+        return new ServiceResult<TData, TError>
+        {
+            Status = ResponseStatus.UnexpectedError,
+            Error = error,
+        };
+    }
+
+    public static new ServiceResult<TData, TError> Unauthorized(TError error)
+    {
+        return new ServiceResult<TData, TError>
+        {
+            Status = ResponseStatus.Unauthorized,
+            Error = error,
+        };
     }
 }

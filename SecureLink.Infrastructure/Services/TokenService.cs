@@ -1,18 +1,25 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Extensions.Configuration.UserSecrets;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using SecureLink.Core.Contracts;
+using SecureLink.Core.Entities;
 using SecureLink.Infrastructure.Contracts;
 
 namespace SecureLink.Infrastructure.Services;
 
-public class TokenService(IOptions<JwtSettings> jwtSettings, ILogger<TokenService> logger)
-    : ITokenService
+public class TokenService(
+    IRefreshTokensRepository refreshTokensRepository,
+    IOptions<JwtSettings> jwtSettings,
+    ILogger<TokenService> logger
+) : ITokenService
 {
+    // TODO: Add error handling
+    private readonly IRefreshTokensRepository _repository = refreshTokensRepository;
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
     private readonly ILogger<TokenService> _logger = logger;
 
@@ -28,7 +35,7 @@ public class TokenService(IOptions<JwtSettings> jwtSettings, ILogger<TokenServic
                 Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Jti,
                 Guid.NewGuid().ToString()
             ),
-            // new (ClaimTypes.Role, "user") // TODO: add roles to user and in the token
+            new(ClaimTypes.Role, "user"), // TODO: add roles to user and in the token
             // But first, I'll have to figure out what authorization pattern would best suit our needs
         };
 
@@ -49,8 +56,34 @@ public class TokenService(IOptions<JwtSettings> jwtSettings, ILogger<TokenServic
         return handler.WriteToken(token);
     }
 
-    public string GenerateRefreshToken()
+    public async Task<string> GenerateRefreshToken(Guid userId)
     {
-        throw new NotImplementedException();
+        var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+
+        RefreshToken refreshToken = new()
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            Value = token,
+            ExpiresAt = DateTimeOffset.UtcNow.AddHours(_jwtSettings.RefreshTokenExpirationInHours),
+        };
+        await PersistToken(refreshToken);
+
+        return token;
+    }
+
+    public async Task<bool> RevokeToken(string refreshToken)
+    {
+        return await _repository.RevokeToken(refreshToken);
+    }
+
+    public async Task<bool> RevokeAllTokens(Guid userId)
+    {
+        return await _repository.RevokeAllTokens(userId);
+    }
+
+    private async Task<bool> PersistToken(RefreshToken refreshToken)
+    {
+        return await _repository.AddToken(refreshToken);
     }
 }

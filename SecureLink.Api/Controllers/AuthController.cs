@@ -1,27 +1,105 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SecureLink.Core.Contracts;
-using SecureLink.Infrastructure.Contracts;
 
 namespace SecureLink.Api.Controllers;
 
 [ApiController]
 [Route("auth")]
-public class AuthController(IUsersRepository usersRepository, ITokenService tokenService) : ControllerBase
+public class AuthController(IAuthService authService, ITokenService tokenService) : ControllerBase
 {
     public readonly ITokenService _tokenService = tokenService;
-    public readonly IUsersRepository _usersRepo = usersRepository;
+    public readonly IAuthService _authService = authService;
 
     [HttpPost]
     [Route("login")]
     public async Task<ActionResult<string>> Login([FromBody] LoginApiRequest request)
     {
-        var user = await _usersRepo.GetByUsername(request.Username);
+        var response = await _authService.Login(
+            new LoginRequest { Username = request.Username, Password = request.Password }
+        );
 
-        if (user is null)
+        if (!response.IsSuccess)
         {
-            return NotFound();
+            return Unauthorized(response.Error);
         }
 
-        return _tokenService.GenerateAccessToken(user.Id);
+        return Ok(response.Data);
+    }
+
+    [HttpPost]
+    [Route("register")]
+    public async Task<ActionResult<string>> Register([FromBody] RegisterApiRequest request)
+    {
+        var response = await _authService.Register(
+            new RegisterRequest
+            {
+                Username = request.Username,
+                Password = request.Password,
+                Name = request.Name,
+                Email = request.Email,
+            }
+        );
+
+        if (!response.IsSuccess)
+        {
+            if (response.Status == ResponseStatus.BadRequest)
+            {
+                return BadRequest(response.Error);
+            }
+
+            return StatusCode(500, response.Error);
+        }
+
+        return Ok("User registered successfully");
+    }
+
+    [HttpPost]
+    [Route("logout")]
+    [Authorize]
+    public async Task<ActionResult<string>> Logout([FromBody] LogoutApiRequest request)
+    {
+        var response = await _authService.Logout(
+            new LogoutRequest { RefreshToken = request.RefreshToken, UserId = User.GetUserId() }
+        );
+
+        if (!response.IsSuccess)
+        {
+            if (response.Status == ResponseStatus.Unauthorized)
+            {
+                return Unauthorized(response.Error!.Message);
+            }
+
+            return StatusCode(500, response.Error!.Message);
+        }
+
+        return Ok("User logged out successfully");
+    }
+
+    [HttpPost]
+    [Route("refresh")]
+    public async Task<ActionResult<LoginResponse>> RefreshTokens(
+        [FromBody] RefreshTokensApiRequest request
+    )
+    {
+        var response = await _authService.RefreshTokens(
+            new RefreshTokensRequest
+            {
+                RefreshToken = request.RefreshToken,
+                UserId = request.UserId,
+            }
+        );
+
+        if (!response.IsSuccess)
+        {
+            if (response.Status == ResponseStatus.Unauthorized)
+            {
+                return Unauthorized(response.Error!.Message);
+            }
+
+            return StatusCode(500, response.Error!.Message);
+        }
+
+        return Ok(response);
     }
 }

@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS refresh_token
+CREATE TABLE IF NOT EXISTS refresh_tokens
 (
     row_id      int NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id          uuid NOT NULL UNIQUE,

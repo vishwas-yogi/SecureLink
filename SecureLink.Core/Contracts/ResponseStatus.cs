@@ -8,4 +8,6 @@ public enum ResponseStatus
     NotFound,
     ValidationError,
     UnexpectedError,
+    BadRequest,
+    Unauthorized,
 }
