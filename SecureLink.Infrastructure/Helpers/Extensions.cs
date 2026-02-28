@@ -15,4 +15,15 @@ internal static class Extensions
             LastModifiedAt = u.LastModifiedAt,
             CreatedAt = u.CreatedAt,
         };
+
+    public static FileResponse ToDto(this StoredFile f) =>
+        new()
+        {
+            Id = f.Id,
+            UserFilename = f.UserFilename,
+            ContentType = f.ContentType,
+            LastModifiedAt = f.LastModifiedAt,
+            CreatedAt = f.CreatedAt,
+            Status = f.Status,
+        };
 }

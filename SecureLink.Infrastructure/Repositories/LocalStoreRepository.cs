@@ -3,7 +3,7 @@ using SecureLink.Core.Contracts;
 
 namespace SecureLink.Infrastructure.Repositories;
 
-public class LocalStoreRepository(ILogger<LocalStoreRepository> logger) : IFileRepository
+public class LocalStoreRepository(ILogger<LocalStoreRepository> logger) : IStorageService
 {
     private readonly ILogger<LocalStoreRepository> _logger = logger;
 
@@ -66,13 +66,13 @@ public class LocalStoreRepository(ILogger<LocalStoreRepository> logger) : IFileR
         if (await FileExistsInternal(filePath))
         {
             File.Delete(filePath);
-            _logger.LogInformation($"Deleted file: {filePath}");
+            _logger.LogInformation("Deleted file: {filePath}", filePath);
         }
     }
 
     private static string GetOutputDir()
     {
-        string outDir = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+        string outDir = Path.Combine("/home/vishwas-yogi/personal", "uploads");
         if (!Directory.Exists(outDir))
         {
             Directory.CreateDirectory(outDir);

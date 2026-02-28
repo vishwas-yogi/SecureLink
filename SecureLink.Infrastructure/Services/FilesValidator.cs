@@ -5,13 +5,13 @@ using static SecureLink.Core.Helpers.FileValidationDefinitions;
 
 namespace SecureLink.Infrastructure.Services;
 
-public class FileValidator(IFileRepository fileRepository)
+public class FilesValidator(IStorageService storageService)
 {
-    private readonly IFileRepository _repository = fileRepository;
+    private readonly IStorageService _storageService = storageService;
 
     public ValidationResult<FileUploadErrorDetails> ValidateFile(
         string? fileName,
-        string mimeType,
+        string? mimeType,
         byte[] fileInitialBytes,
         int bytesRead
     )
@@ -68,14 +68,14 @@ public class FileValidator(IFileRepository fileRepository)
         string filename
     )
     {
-        var fileExists = await _repository.FileExists(filename);
+        var fileExists = await _storageService.FileExists(filename);
 
         if (!fileExists)
         {
             return new ValidationResult<FileDownloadErrorDetails>
             {
                 IsValid = false,
-                Error = new FileDownloadErrorDetails { Error = "File not found" },
+                Error = new FileDownloadErrorDetails { Error = $"File '{filename}' not found" },
             };
         }
         return new ValidationResult<FileDownloadErrorDetails> { IsValid = true };
@@ -99,7 +99,7 @@ public class FileValidator(IFileRepository fileRepository)
 
     private static ValidationResult<FileUploadErrorDetails> ValidateFileInternal(
         string filename,
-        string mimeType,
+        string? mimeType,
         byte[] fileInitialBytes,
         int bytesRead
     )
@@ -114,7 +114,10 @@ public class FileValidator(IFileRepository fileRepository)
             return new ValidationResult<FileUploadErrorDetails>
             {
                 IsValid = false,
-                Error = new FileUploadErrorDetails { Message = "Unsupported file type" },
+                Error = new FileUploadErrorDetails
+                {
+                    Message = $"Unsupported file type {extension} for '{filename}'",
+                },
             };
         }
 
@@ -131,7 +134,10 @@ public class FileValidator(IFileRepository fileRepository)
             return new ValidationResult<FileUploadErrorDetails>
             {
                 IsValid = false,
-                Error = new FileUploadErrorDetails { Message = "Invalid MIME type" },
+                Error = new FileUploadErrorDetails
+                {
+                    Message = $"Invalid / Unsupported MIME type '{mimeType}' for file '{filename}'",
+                },
             };
         }
 
@@ -143,7 +149,7 @@ public class FileValidator(IFileRepository fileRepository)
                 IsValid = false,
                 Error = new FileUploadErrorDetails
                 {
-                    Message = "File is too small to be a valid file.",
+                    Message = $"File '{filename}' is too small to be a valid file.",
                 },
             };
         }
@@ -162,7 +168,10 @@ public class FileValidator(IFileRepository fileRepository)
                 return new ValidationResult<FileUploadErrorDetails>
                 {
                     IsValid = false,
-                    Error = new FileUploadErrorDetails { Message = "Invalid file signature" },
+                    Error = new FileUploadErrorDetails
+                    {
+                        Message = $"Invalid file signature for file '{filename}'",
+                    },
                 };
             }
         }
