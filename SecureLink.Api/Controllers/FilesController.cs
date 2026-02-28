@@ -81,12 +81,21 @@ public class FilesController(IFilesService fileService, ILogger<FilesController>
 
         var fileStream = response.Data!.FileStream;
         var fileDetails = response.Data.FileDetails;
-        Response.Headers.Append("X-File-Metadata", JsonSerializer.Serialize(fileDetails));
+        var safeDetails = new
+        {
+            fileDetails.Id,
+            Filename = fileDetails.UserFilename,
+            fileDetails.ContentType,
+            fileDetails.CreatedAt,
+            fileDetails.LastModifiedAt,
+            fileDetails.Status,
+        };
+        Response.Headers.Append("X-File-Metadata", JsonSerializer.Serialize(safeDetails));
 
         var contentType = fileDetails!.ContentType;
 
         // File() already sets the Status code to 200. So no need to wrap it in Ok()
         // TODO: Research and enhance this to allow user to play / pause stream
-        return File(fileStream!, contentType, fileDetails.Filename, true);
+        return File(fileStream!, contentType, fileDetails.UserFilename, true);
     }
 }

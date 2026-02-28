@@ -109,7 +109,10 @@ public class FilesService(
 
                 response.Id = result.Data;
                 results.Add(response);
-                totalBytesRead += content.Length;
+                if (bufferedStream.CanSeek)
+                {
+                    totalBytesRead += bufferedStream.Length;
+                }
             }
             // Else handle the metadata
             else if (contentDispositionHeader!.IsFormDisposition())
