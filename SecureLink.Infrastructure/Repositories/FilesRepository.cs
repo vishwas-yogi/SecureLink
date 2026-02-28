@@ -7,10 +7,11 @@ using SecureLink.Infrastructure.Contracts;
 
 namespace SecureLink.Infrastructure.Repositories;
 
-public class FileRepository(ILogger<FileRepository> logger, IDapperContext dapperContext)
-    : RepositoryBase(dapperContext)
+public class FilesRepository(ILogger<FilesRepository> logger, IDapperContext dapperContext)
+    : RepositoryBase(dapperContext),
+        IFilesRepository
 {
-    private ILogger<FileRepository> _logger = logger;
+    private ILogger<FilesRepository> _logger = logger;
     private string _selectColumns =
         "id, filename, user_filename, content_type, location, owner, status, created_at, last_modified_at";
 

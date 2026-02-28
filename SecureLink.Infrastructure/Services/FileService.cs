@@ -12,14 +12,14 @@ namespace SecureLink.Infrastructure.Services;
 public class FilesService(
     IUploadService uploadService,
     FileValidator validator,
-    FileRepository fileRepository,
+    IFilesRepository filesRepository,
     ILogger<FilesService> logger
 ) : IFilesService
 {
     private readonly ILogger<FilesService> _logger = logger;
     private readonly IUploadService _uploadService = uploadService;
     private readonly FileValidator _validator = validator;
-    private readonly FileRepository _fileRepository = fileRepository;
+    private readonly IFilesRepository _filesRepository = filesRepository;
 
     public async Task<ServiceResult<List<FileUploadResponse>, FileUploadErrorDetails>> Upload(
         string boundary,
@@ -143,7 +143,7 @@ public class FilesService(
         ServiceResult<FileDownloadServiceResponse, FileDownloadErrorDetails>
     > Download(Guid fileId, Guid currentUserId)
     {
-        var file = await _fileRepository.Get(
+        var file = await _filesRepository.Get(
             new FileGetRepoRequest { Id = fileId, Owner = currentUserId }
         );
         _logger.LogInformation("Fetched file: {response}", file);
@@ -187,7 +187,7 @@ public class FilesService(
     {
         try
         {
-            Guid fileId = await _fileRepository.Persist(request.RepoRequest);
+            Guid fileId = await _filesRepository.Persist(request.RepoRequest);
             if (fileId == Guid.Empty)
                 return ServiceResult<Guid, FileUploadErrorDetails>.UnexpectedError(
                     new FileUploadErrorDetails
@@ -208,7 +208,7 @@ public class FilesService(
                     }
                 );
 
-            var updated = await _fileRepository.MarkFileAvailable(fileId, uplaodedFileLocation);
+            var updated = await _filesRepository.MarkFileAvailable(fileId, uplaodedFileLocation);
             if (!updated)
                 return ServiceResult<Guid, FileUploadErrorDetails>.UnexpectedError(
                     new FileUploadErrorDetails { Message = "Failed to mark the file as available" }

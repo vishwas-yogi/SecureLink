@@ -50,7 +50,7 @@ builder.Services.AddScoped<FileValidator>();
 builder.Services.AddScoped<IUploadService, LocalStoreRepository>();
 builder.Services.Configure<DapperOptions>(builder.Configuration.GetSection("Dapper"));
 builder.Services.AddSingleton<IDapperContext, DapperContext>();
-builder.Services.AddScoped<FileRepository>();
+builder.Services.AddScoped<IFilesRepository, FilesRepository>();
 
 // User related services
 builder.Services.AddScoped<IUsersService, UsersService>();
