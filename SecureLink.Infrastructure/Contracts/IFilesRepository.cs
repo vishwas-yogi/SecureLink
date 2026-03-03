@@ -7,4 +7,5 @@ public interface IFilesRepository
     public Task<StoredFile?> Get(FileGetRepoRequest request);
     public Task<Guid> Persist(FilePersistRepoRequest request);
     public Task<bool> MarkFileAvailable(Guid fileId, string fileLocation);
+    public Task<bool> UpdateMetadata(Guid fileId, string thumbKey);
 }

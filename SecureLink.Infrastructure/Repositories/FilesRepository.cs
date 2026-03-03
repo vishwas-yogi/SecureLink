@@ -1,4 +1,3 @@
-using System.Reflection.Metadata.Ecma335;
 using Dapper;
 using Microsoft.Extensions.Logging;
 using SecureLink.Core.Contracts;
@@ -92,6 +91,22 @@ public class FilesRepository(ILogger<FilesRepository> logger, IDapperContext dap
             Id = fileId,
             Status = FileStatus.Available.ToString(),
         };
+
+        using var connection = DbContext.CreateConnection();
+        var affected = await connection.ExecuteAsync(sql, variables);
+        return affected > 0;
+    }
+
+    public async Task<bool> UpdateMetadata(Guid fileId, string thumbKey)
+    {
+        var sql = """
+                update files
+                set
+                    metadata = metadata || jsonb_build_object('thumbkey', @ThumbKey)
+                where id = @Id;
+            """;
+
+        var variables = new { ThumbKey = thumbKey, Id = fileId };
 
         using var connection = DbContext.CreateConnection();
         var affected = await connection.ExecuteAsync(sql, variables);
