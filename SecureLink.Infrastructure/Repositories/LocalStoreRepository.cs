@@ -7,9 +7,9 @@ public class LocalStoreRepository(ILogger<LocalStoreRepository> logger) : IStora
 {
     private readonly ILogger<LocalStoreRepository> _logger = logger;
 
-    public async Task<string> Upload(Stream file, string fileName)
+    public async Task<string> Upload(Stream file, string filename)
     {
-        var outputFilePath = GetFullFilePath(fileName);
+        var outputFilePath = GetFullFilePath(filename);
         await RemoveFileIfExists(outputFilePath);
 
         // Constuct FileStream for the output file
@@ -27,10 +27,10 @@ public class LocalStoreRepository(ILogger<LocalStoreRepository> logger) : IStora
         return outputFilePath;
     }
 
-    public Task<Stream> Download(string fileName)
+    public Task<Stream> Download(string filename)
     {
         _logger.LogInformation("Starting download of the requested file");
-        var filePath = GetFullFilePath(fileName);
+        var filePath = GetFullFilePath(filename);
 
         var options = new FileStreamOptions
         {

@@ -10,7 +10,7 @@ public class FilesValidator(IStorageService storageService)
     private readonly IStorageService _storageService = storageService;
 
     public ValidationResult<FileUploadErrorDetails> ValidateFile(
-        string? fileName,
+        string? filename,
         string? mimeType,
         byte[] fileInitialBytes,
         int bytesRead
@@ -18,14 +18,14 @@ public class FilesValidator(IStorageService storageService)
     {
         // TODO: In future, we can change method to accept rules
         // then we can iterate over the rules instead of manually calling each validation
-        var fileNameValidationRes = ValidateFileName(fileName);
-        if (!fileNameValidationRes.IsValid)
+        var filenameValidationRes = ValidateFileName(filename);
+        if (!filenameValidationRes.IsValid)
         {
-            return fileNameValidationRes;
+            return filenameValidationRes;
         }
 
         var fileValidationRes = ValidateFileInternal(
-            fileName!,
+            filename!,
             mimeType,
             fileInitialBytes,
             bytesRead

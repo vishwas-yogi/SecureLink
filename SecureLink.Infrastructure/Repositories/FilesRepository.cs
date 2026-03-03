@@ -1,4 +1,3 @@
-using System.Reflection.Metadata.Ecma335;
 using Dapper;
 using Microsoft.Extensions.Logging;
 using SecureLink.Core.Contracts;
@@ -13,7 +12,7 @@ public class FilesRepository(ILogger<FilesRepository> logger, IDapperContext dap
 {
     private readonly ILogger<FilesRepository> _logger = logger;
     private readonly string _selectColumns =
-        "id, filename, user_filename, content_type, location, owner, status, created_at, last_modified_at";
+        "id, filename, user_filename, content_type, metadata, location, owner, status, created_at, last_modified_at";
 
     public async Task<StoredFile?> Get(FileGetRepoRequest request)
     {
@@ -92,6 +91,22 @@ public class FilesRepository(ILogger<FilesRepository> logger, IDapperContext dap
             Id = fileId,
             Status = FileStatus.Available.ToString(),
         };
+
+        using var connection = DbContext.CreateConnection();
+        var affected = await connection.ExecuteAsync(sql, variables);
+        return affected > 0;
+    }
+
+    public async Task<bool> UpdateMetadata(Guid fileId, string thumbKey)
+    {
+        var sql = """
+                update files
+                set
+                    metadata = COALESCE(metadata, '{}'::jsonb) || jsonb_build_object('thumbkey', @ThumbKey)
+                where id = @Id;
+            """;
+
+        var variables = new { ThumbKey = thumbKey, Id = fileId };
 
         using var connection = DbContext.CreateConnection();
         var affected = await connection.ExecuteAsync(sql, variables);

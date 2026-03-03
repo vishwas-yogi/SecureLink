@@ -12,6 +12,7 @@ public class FilesService(
     IStorageService storageService,
     FilesValidator validator,
     IFilesRepository filesRepository,
+    IThumbnailService thumbnailService,
     ILogger<FilesService> logger
 ) : IFilesService
 {
@@ -19,6 +20,7 @@ public class FilesService(
     private readonly IStorageService _storageService = storageService;
     private readonly FilesValidator _validator = validator;
     private readonly IFilesRepository _filesRepository = filesRepository;
+    private readonly IThumbnailService _thumbnailService = thumbnailService;
 
     public async Task<ServiceResult<List<FileUploadResponse>, FileUploadErrorDetails>> Upload(
         string boundary,
@@ -91,11 +93,12 @@ public class FilesService(
                     ContentType = contentType!,
                 };
 
+                // Persist the file to the storage.
                 var result = await Persist(
                     new FilePersistInternalRequest
                     {
                         RepoRequest = repoRequest,
-                        UploadedFileStream = bufferedStream,
+                        FileStream = bufferedStream,
                     }
                 );
 
@@ -109,6 +112,17 @@ public class FilesService(
 
                 response.Id = result.Data;
                 results.Add(response);
+
+                // Compress and persist the compressed image.
+                // First reset the stream.
+                // TODO: handoff the thumbnail generation to queue or background workers.
+                // For now keeping it sequencial
+                bufferedStream.Seek(0, SeekOrigin.Begin);
+                var thumbnailName = Path.ChangeExtension($"{outputFileName}_thumbnail", "webp");
+                using var thumbStream = await _thumbnailService.CreateThumbnail(bufferedStream);
+                var thumbnailKey = await _storageService.Upload(thumbStream, thumbnailName);
+                await _filesRepository.UpdateMetadata(result.Data, thumbnailKey);
+
                 if (bufferedStream.CanSeek)
                 {
                     totalBytesRead += bufferedStream.Length;
@@ -120,10 +134,10 @@ public class FilesService(
                 // Converting content from Stream to string
                 using var streamReader = new StreamReader(content);
                 string value = await streamReader.ReadToEndAsync();
-                string key = contentDispositionHeader!.Name.Value ?? "";
+                string prop = contentDispositionHeader!.Name.Value ?? "";
 
                 // Just logging for now
-                _logger.LogInformation("Metadata for file: {key} = {value}", key, value);
+                _logger.LogInformation("Metadata for file: {key} = {value}", prop, value);
             }
         }
 
@@ -193,7 +207,7 @@ public class FilesService(
                 );
 
             string uplaodedFileLocation = await _storageService.Upload(
-                request.UploadedFileStream,
+                request.FileStream,
                 request.RepoRequest.Filename
             );
             if (string.IsNullOrEmpty(uplaodedFileLocation))
@@ -232,6 +246,6 @@ public class FilesService(
     private record FilePersistInternalRequest
     {
         public required FilePersistRepoRequest RepoRequest { get; init; }
-        public required Stream UploadedFileStream { get; init; }
+        public required Stream FileStream { get; init; }
     }
 }

@@ -51,6 +51,7 @@ builder.Services.AddScoped<IStorageService, LocalStoreRepository>();
 builder.Services.Configure<DapperOptions>(builder.Configuration.GetSection("Dapper"));
 builder.Services.AddSingleton<IDapperContext, DapperContext>();
 builder.Services.AddScoped<IFilesRepository, FilesRepository>();
+builder.Services.AddScoped<IThumbnailService, ThumbnailService>();
 
 // User related services
 builder.Services.AddScoped<IUsersService, UsersService>();
