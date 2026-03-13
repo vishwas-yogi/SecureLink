@@ -3,7 +3,6 @@ from deepface import DeepFace
 
 MODEL_NAME = "Facenet512"
 DETECTOR_BACKEND = "retinaface"
-ENFORCE_DETECTION = False
 
 
 def load_models():
@@ -18,9 +17,12 @@ def load_models():
 
 
 def generate_embeddings(img):
-    return DeepFace.represent(
-        img_path=img,
-        model_name=MODEL_NAME,
-        detector_backend=DETECTOR_BACKEND,
-        enforce_detection=ENFORCE_DETECTION,
-    )
+    try: 
+        return DeepFace.represent(
+            img_path=img,
+            model_name=MODEL_NAME,
+            detector_backend=DETECTOR_BACKEND,
+            enforce_detection=True,
+        )
+    except ValueError:
+        return [] # incase no faces are detected
