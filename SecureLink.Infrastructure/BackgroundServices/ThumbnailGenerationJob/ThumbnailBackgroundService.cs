@@ -8,11 +8,13 @@ namespace SecureLink.Infrastructure.BackgroundServices.ThumbnailGenerationJob;
 
 public class ThumbnailBackgroundService(
     IThumbnailQueue queue,
+    IEmbeddingQueue embeddingQueue,
     IServiceScopeFactory scopeFactory,
     ILogger<ThumbnailBackgroundService> logger
 ) : BackgroundService
 {
     private readonly IThumbnailQueue _queue = queue;
+    private readonly IEmbeddingQueue _embeddingQueue = embeddingQueue;
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
     private readonly ILogger<ThumbnailBackgroundService> _logger = logger;
     private const int _maxRetries = 3;
@@ -62,11 +64,36 @@ public class ThumbnailBackgroundService(
 
             // Update the thumbKey to db
             await filesRepository.UpdateMetadata(job.FileId, reskey);
+
+            // Add the thumbnail for embedding
+            _logger.LogInformation(
+                "Adding thumbnail to the embedding job queue for file: {fileId}",
+                job.FileId
+            );
+            await AddEmbeddingJob(
+                new EmbeddingJob { FileId = job.FileId, ThumbnailKey = thumbKey }
+            );
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Processing failed for file: {fileId}", job.FileId);
             await HandleRetry(job, token);
+        }
+    }
+
+    private async Task AddEmbeddingJob(EmbeddingJob job)
+    {
+        try
+        {
+            await _embeddingQueue.QueueAsync(job);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Failed to enqueue embedding job for fileId: {fileId}",
+                job.FileId
+            );
         }
     }
 

@@ -33,6 +33,7 @@ async def submit_embeddings_request(
     # injecting the httpx client
     client: Annotated[httpx.AsyncClient, Depends(get_http_client)],
 ):
+    logger.info(f"request for embeddings received. Request: {request}")
     background_tasks.add_task(process_embeddings, request, storage, client)
     return {"message": "Accepted"}
 
@@ -40,6 +41,7 @@ async def submit_embeddings_request(
 async def process_embeddings(
     request: GetEmbeddingsRequest, storage: StorageService, client: httpx.AsyncClient
 ):
+    logger.info(f"Starting embedding generation for Request: {request}")
     try:
         image_bytes = await storage.download(storage_key=request.storage_key)
 

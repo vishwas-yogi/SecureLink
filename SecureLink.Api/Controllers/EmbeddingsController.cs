@@ -11,7 +11,7 @@ public class EmbeddingsController(ILogger<EmbeddingsController> logger) : Contro
 
     [InternalApiKey]
     [HttpPost]
-    [Route("{fileId}/embeddings")]
+    [Route("files/{fileId}/embeddings")]
     public async Task<ActionResult> StoreEmbeddings(
         [FromRoute] Guid fileId,
         [FromBody] SubmitEmbeddingsRequest[] faces
