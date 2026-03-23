@@ -80,7 +80,7 @@ public class ThumbnailBackgroundService(
 
         var retryJob = job with { RetryCount = job.RetryCount + 1 };
 
-        await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, retryJob.RetryCount)));
+        await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, retryJob.RetryCount)), token);
         await _queue.QueueAsync(retryJob, token);
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using SecureLink.Core.Contracts;
+using SecureLink.Infrastructure.BackgroundServices.EmbeddingGenerationJob;
 using SecureLink.Infrastructure.BackgroundServices.ThumbnailGenerationJob;
 using SecureLink.Infrastructure.Contracts;
 using SecureLink.Infrastructure.Helpers;
@@ -58,6 +59,18 @@ builder.Services.AddSingleton<IThumbnailService, ThumbnailService>();
 builder.Services.AddSingleton<IThumbnailQueue, ThumbnailQueue>();
 builder.Services.AddHostedService<ThumbnailBackgroundService>();
 
+builder.Services.AddHttpClient(
+    "embedding",
+    (serviceProvider, client) =>
+    {
+        client.BaseAddress = new Uri("http://localhost:8000");
+    }
+);
+
+// Add background service for embedding
+builder.Services.AddSingleton<IEmbeddingQueue, EmbeddingQueue>();
+builder.Services.AddHostedService<EmbeddingBackgroundService>();
+
 // User related services
 builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<IUsersValidator, UsersValidator>();
@@ -70,6 +83,9 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSet
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IRefreshTokensRepository, RefreshTokensRepository>();
 builder.Services.AddScoped<IAuthValidator, AuthValidator>();
+
+// Internal Api Key options
+builder.Services.Configure<InternalApiOptions>(builder.Configuration.GetSection("InternalApiKey"));
 
 builder.WebHost.ConfigureKestrel(options =>
 {
