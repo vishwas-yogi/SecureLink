@@ -71,7 +71,8 @@ public class ThumbnailBackgroundService(
                 job.FileId
             );
             await AddEmbeddingJob(
-                new EmbeddingJob { FileId = job.FileId, ThumbnailKey = thumbKey }
+                new EmbeddingJob { FileId = job.FileId, ThumbnailKey = thumbKey },
+                token
             );
         }
         catch (Exception ex)
@@ -81,11 +82,11 @@ public class ThumbnailBackgroundService(
         }
     }
 
-    private async Task AddEmbeddingJob(EmbeddingJob job)
+    private async Task AddEmbeddingJob(EmbeddingJob job, CancellationToken token)
     {
         try
         {
-            await _embeddingQueue.QueueAsync(job);
+            await _embeddingQueue.QueueAsync(job, token);
         }
         catch (Exception ex)
         {

@@ -12,10 +12,19 @@ public class InternalApiKeyFilter(IOptions<InternalApiOptions> options) : IAsync
 
     public Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
-        if (!context.HttpContext.Request.Headers.TryGetValue(HeaderName, out var key))
+        if (string.IsNullOrWhiteSpace(_options.ApiKey))
+        {
+            context.Result = new StatusCodeResult(500);
+            return Task.CompletedTask;
+        }
+
+        if (
+            !context.HttpContext.Request.Headers.TryGetValue(HeaderName, out var key)
+            || string.IsNullOrWhiteSpace(key.ToString())
+        )
         {
             context.Result = new UnauthorizedObjectResult(
-                new { message = $"{HeaderName} header missing!" }
+                new { message = $"{HeaderName} header missing or empty!" }
             );
             return Task.CompletedTask;
         }

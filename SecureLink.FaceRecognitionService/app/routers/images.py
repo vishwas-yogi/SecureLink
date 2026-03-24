@@ -60,7 +60,7 @@ async def process_embeddings(
         ]
 
         logger.info(
-            f"Notifying dotnet service. File: {request.file_id} ;; Embeddings = {result}"
+            f"Notifying dotnet service for file {request.file_id} with {len(result)} accepted faces"
         )
 
         await notify_dotnet(
