@@ -1,5 +1,6 @@
 namespace SecureLink.Core.Contracts;
 
+// Tracks the upload status of file
 public enum FileStatus
 {
     Available,

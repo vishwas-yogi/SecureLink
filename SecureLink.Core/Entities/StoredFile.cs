@@ -10,6 +10,8 @@ public class StoredFile
     public required string ContentType { get; set; }
     public string? Location { get; set; }
     public required Guid Owner { get; set; }
+
+    // For tracking upload status of file
     public FileStatus Status { get; set; } = FileStatus.Pending;
     public string Metadata { get; set; } = "{}";
     public DateTimeOffset? CreatedAt { get; set; }

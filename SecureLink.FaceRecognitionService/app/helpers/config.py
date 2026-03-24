@@ -1,3 +1,6 @@
+from typing import cast
+from ..contracts.embedding_object import EmbeddingObject
+
 import numpy as np
 from deepface import DeepFace
 
@@ -16,13 +19,14 @@ def load_models():
     )
 
 
-def generate_embeddings(img):
+def generate_embeddings(img) -> list[EmbeddingObject]:
     try: 
-        return DeepFace.represent(
+        result =  DeepFace.represent(
             img_path=img,
             model_name=MODEL_NAME,
             detector_backend=DETECTOR_BACKEND,
             enforce_detection=True,
         )
+        return cast(list[EmbeddingObject], result)
     except ValueError:
         return [] # incase no faces are detected
