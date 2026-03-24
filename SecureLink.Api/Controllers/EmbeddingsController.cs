@@ -14,13 +14,13 @@ public class EmbeddingsController(ILogger<EmbeddingsController> logger) : Contro
     [Route("files/{fileId}/embeddings")]
     public async Task<ActionResult> StoreEmbeddings(
         [FromRoute] Guid fileId,
-        [FromBody] SubmitEmbeddingsRequest[] faces
+        [FromBody] SubmitEmbeddingsRequest request
     )
     {
         _logger.LogInformation(
             "Embeddings received for file: {fileId}. Embeddings are: {faces}",
             fileId,
-            faces
+            request
         );
 
         // TODO: persist embeddings to DB
