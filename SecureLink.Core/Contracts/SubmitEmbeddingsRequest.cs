@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace SecureLink.Core.Contracts;
 
-public record SubmitEmbeddingsRequest
+public record SubmitEmbeddingsApiRequest
 {
     [JsonPropertyName("faces")]
     public required FaceDetails[] Faces { get; init; }
@@ -12,7 +12,7 @@ public record SubmitEmbeddingsRequest
 
     public override string ToString()
     {
-        return $"SubmitEmbeddingRequest {{ IsSucess = {IsSuccess}, FaceCount = {Faces.Length}, Faces = [{string.Join(", ", (IEnumerable<FaceDetails>)Faces)}] }}";
+        return $"SubmitEmbeddingRequest {{ IsSuccess = {IsSuccess}, FaceCount = {Faces.Length}, Faces = [{string.Join(", ", (IEnumerable<FaceDetails>)Faces)}] }}";
     }
 }
 
