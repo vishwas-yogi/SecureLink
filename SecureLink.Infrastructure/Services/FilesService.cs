@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using SecureLink.Core;
 using SecureLink.Core.Contracts;
-using SecureLink.Infrastructure.BackgroundServices.ThumbnailGenerationJob;
 using SecureLink.Infrastructure.Contracts;
 using SecureLink.Infrastructure.Helpers;
 
