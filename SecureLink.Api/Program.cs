@@ -84,6 +84,10 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IRefreshTokensRepository, RefreshTokensRepository>();
 builder.Services.AddScoped<IAuthValidator, AuthValidator>();
 
+// Embeddings related services
+builder.Services.AddScoped<IEmbeddingsService, EmbeddingsService>();
+builder.Services.AddScoped<IEmbeddingsRepository, EmbeddingsRepository>();
+
 // Internal Api Key options
 builder.Services.Configure<InternalApiOptions>(builder.Configuration.GetSection("InternalApiKey"));
 
