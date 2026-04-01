@@ -12,7 +12,7 @@ public record SubmitEmbeddingsApiRequest
 
     public override string ToString()
     {
-        return $"SubmitEmbeddingRequest {{ IsSuccess = {IsSuccess}, FaceCount = {Faces.Length}, Faces = [{string.Join(", ", (IEnumerable<FaceDetails>)Faces)}] }}";
+        return $"SubmitEmbeddingsApiRequest {{ IsSuccess = {IsSuccess}, FaceCount = {Faces.Length}, Faces = [{string.Join(", ", (IEnumerable<FaceDetails>)Faces)}] }}";
     }
 }
 

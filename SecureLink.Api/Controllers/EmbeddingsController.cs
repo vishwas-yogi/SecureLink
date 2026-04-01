@@ -35,6 +35,7 @@ public class EmbeddingsController(
                 "The python service failed to generate embeddings for file: {fileId}",
                 fileId
             );
+            return BadRequest("Failed to generate embeddings");
         }
 
         var response = await _embeddingsService.PersistEmbedding(

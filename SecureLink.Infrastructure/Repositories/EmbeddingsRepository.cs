@@ -43,6 +43,7 @@ public class EmbeddingsRepository(IDapperContext dapperContext)
 
     public async Task<List<Match>> Search(Face face)
     {
+        // added alias for best_match_score as the Match model has MatchScore field.
         var sql = $"""
                     with best_matches as (
                         select distinct on (file_id)
@@ -51,7 +52,7 @@ public class EmbeddingsRepository(IDapperContext dapperContext)
                         from face_embeddings
                         order by file_id, embedding <=> @InputVector::vector
                     )
-                    select file_id, best_match_score
+                    select file_id, best_match_score as match_score
                     from best_matches
                     where best_match_score > @Threshold
                     order by best_match_score desc;
