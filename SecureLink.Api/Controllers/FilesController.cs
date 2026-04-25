@@ -132,6 +132,6 @@ public class FilesController(
             };
         }
 
-        return Ok(response);
+        return Ok(response.Data);
     }
 }

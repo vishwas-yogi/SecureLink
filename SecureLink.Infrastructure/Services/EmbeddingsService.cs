@@ -96,7 +96,7 @@ public class EmbeddingsService(
         contentStream.Headers.ContentType = new MediaTypeHeaderValue(request.ContentType);
 
         using var client = _factory.CreateClient("embedding");
-        var response = await client.PostAsync("/selfie-embedding", contentStream);
+        var response = await client.PostAsync("/images/selfie-embedding", contentStream);
         if (!response.IsSuccessStatusCode)
         {
             return ServiceResult<SearchSimilarResponse, ErrorDetails>.UnexpectedError(
@@ -109,7 +109,7 @@ public class EmbeddingsService(
         }
 
         var result = await response.Content.ReadFromJsonAsync<Face>(_options);
-        if (result?.Embedding.Length == 0)
+        if (result is null || result.Embedding is null || result?.Embedding.Length == 0)
         {
             return ServiceResult<SearchSimilarResponse, ErrorDetails>.ValidationError(
                 new ErrorDetails
