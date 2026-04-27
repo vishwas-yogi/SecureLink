@@ -43,6 +43,7 @@ public class EmbeddingsRepository(IDapperContext dapperContext)
 
     public async Task<List<Match>> Search(Face face)
     {
+        // Cosine similarity for Facenet512
         // added alias for best_match_score as the Match model has MatchScore field.
         var sql = $"""
                     with best_matches as (
@@ -58,7 +59,7 @@ public class EmbeddingsRepository(IDapperContext dapperContext)
                     order by best_match_score desc;
             """;
 
-        var variables = new { InputVector = face.Embedding, Threshold = 0.6 };
+        var variables = new { InputVector = face.Embedding, Threshold = 0.45 };
 
         using var connection = DbContext.CreateConnection();
         var matches = await connection.QueryAsync<Match>(sql, variables);

@@ -82,3 +82,20 @@ async def notify_dotnet(
         response.raise_for_status()
     except Exception as err:
         logger.error(f"Failed to notify dotnet for File: {file_id}: {err}")
+
+
+@router.post('/selfie-embeddings', status_code=200)
+async def get_selfie_embeddings(request: Request) -> dict:
+    image_bytes = await request.body()
+    image_array = np.frombuffer(image_bytes, dtype=np.uint8)
+    image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+
+    if image is None:
+        raise HTTPException(status_code=400, detail="Invalid Image")
+    
+    faces = await run_in_threadpool(generate_embeddings, image)
+    if not faces:
+        return {"embedding": None}
+
+    best_face = max(faces, key=lambda f: f["face_confidence"])
+    return {"embedding": best_face["embedding"], "face_confidence": best_face["face_confidence"]}

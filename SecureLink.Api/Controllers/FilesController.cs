@@ -10,11 +10,15 @@ namespace SecureLink.Api.Controllers;
 // TODO: Add a cancellation token
 [ApiController]
 [Route("files")]
-public class FilesController(IFilesService fileService, ILogger<FilesController> logger)
-    : ControllerBase
+public class FilesController(
+    IFilesService fileService,
+    IEmbeddingsService embeddingsService,
+    ILogger<FilesController> logger
+) : ControllerBase
 {
     private readonly ILogger<FilesController> _logger = logger;
     private readonly IFilesService _fileService = fileService;
+    private readonly IEmbeddingsService _embeddingService = embeddingsService;
 
     [HttpPost]
     [Route("")]
@@ -95,7 +99,43 @@ public class FilesController(IFilesService fileService, ILogger<FilesController>
         var contentType = fileDetails!.ContentType;
 
         // File() already sets the Status code to 200. So no need to wrap it in Ok()
-        // TODO: Research and enhance this to allow user to play / pause stream
         return File(fileStream!, contentType, fileDetails.UserFilename, true);
+    }
+
+    [HttpPost]
+    [Route("search")]
+    public async Task<ActionResult> Search(IFormFile selfie)
+    {
+        var currentUser = User.GetUserId();
+        if (currentUser is null)
+        {
+            return Unauthorized("Unable to resolve the logged in user");
+        }
+
+        if (selfie is null || selfie.Length == 0)
+        {
+            return BadRequest("A selfie image is required");
+        }
+        using var stream = selfie.OpenReadStream();
+
+        var response = await _embeddingService.Search(
+            new SearchImagesRequest
+            {
+                ImageStream = stream,
+                ContentType = selfie.ContentType,
+                UserId = currentUser.Value,
+            }
+        );
+
+        if (!response.IsSuccess)
+        {
+            return response.Status switch
+            {
+                ResponseStatus.ValidationError => StatusCode(400, response.Error),
+                _ => StatusCode(500, response.Error),
+            };
+        }
+
+        return Ok(response.Data);
     }
 }
