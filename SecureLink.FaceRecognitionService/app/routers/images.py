@@ -93,7 +93,7 @@ async def get_selfie_embeddings(request: Request) -> dict:
     if image is None:
         raise HTTPException(status_code=400, detail="Invalid Image")
     
-    faces = generate_embeddings(image)
+    faces = await run_in_threadpool(generate_embeddings, image)
     if not faces:
         return {"embedding": None}
 

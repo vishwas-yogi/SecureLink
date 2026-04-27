@@ -106,13 +106,17 @@ public class FilesController(
     [Route("search")]
     public async Task<ActionResult> Search(IFormFile selfie)
     {
-        using var stream = selfie.OpenReadStream();
         var currentUser = User.GetUserId();
-
         if (currentUser is null)
         {
             return Unauthorized("Unable to resolve the logged in user");
         }
+
+        if (selfie is null || selfie.Length == 0)
+        {
+            return BadRequest("A selfie image is required");
+        }
+        using var stream = selfie.OpenReadStream();
 
         var response = await _embeddingService.Search(
             new SearchImagesRequest

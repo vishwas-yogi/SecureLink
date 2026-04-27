@@ -92,35 +92,48 @@ public class EmbeddingsService(
         SearchImagesRequest request
     )
     {
-        using var contentStream = new StreamContent(request.ImageStream);
-        contentStream.Headers.ContentType = new MediaTypeHeaderValue(request.ContentType);
-
-        using var client = _factory.CreateClient("embedding");
-        var response = await client.PostAsync("/images/selfie-embedding", contentStream);
-        if (!response.IsSuccessStatusCode)
+        try
         {
+            using var contentStream = new StreamContent(request.ImageStream);
+            contentStream.Headers.ContentType = new MediaTypeHeaderValue(request.ContentType);
+
+            using var client = _factory.CreateClient("embedding");
+            var response = await client.PostAsync("/images/selfie-embeddings", contentStream);
+            if (!response.IsSuccessStatusCode)
+            {
+                return ServiceResult<SearchSimilarResponse, ErrorDetails>.UnexpectedError(
+                    new ErrorDetails
+                    {
+                        Message =
+                            "Invalid image. Failed to process the image. Kindly, try with another image",
+                    }
+                );
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<Face>(_options);
+            if (result is null || result.Embedding is null || result?.Embedding.Length == 0)
+            {
+                return ServiceResult<SearchSimilarResponse, ErrorDetails>.ValidationError(
+                    new ErrorDetails
+                    {
+                        Message = "Invalid Image. No faces detected. Kindly, try with another image",
+                    }
+                );
+            }
+
+            return await SearchSimilarImages(
+                new SearchSimilarRequest { Face = result!, UserId = request.UserId }
+            );
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Search failed for user: {userId}", request.UserId);
             return ServiceResult<SearchSimilarResponse, ErrorDetails>.UnexpectedError(
                 new ErrorDetails
                 {
-                    Message =
-                        "Invalid image. Failed to process the image. Kindly, try with another image",
+                    Message = "Something went wrong while trying to find the matches"
                 }
             );
         }
-
-        var result = await response.Content.ReadFromJsonAsync<Face>(_options);
-        if (result is null || result.Embedding is null || result?.Embedding.Length == 0)
-        {
-            return ServiceResult<SearchSimilarResponse, ErrorDetails>.ValidationError(
-                new ErrorDetails
-                {
-                    Message = "Invalid Image. No faces detected. Kindly, try with another image",
-                }
-            );
-        }
-
-        return await SearchSimilarImages(
-            new SearchSimilarRequest { Face = result!, UserId = request.UserId }
-        );
     }
 }
