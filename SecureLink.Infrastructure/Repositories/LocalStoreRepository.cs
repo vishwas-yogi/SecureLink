@@ -73,7 +73,7 @@ public class LocalStoreRepository(ILogger<LocalStoreRepository> logger) : IStora
 
     private static string GetOutputDir()
     {
-        string outDir = Path.Combine("/home/vishwas-yogi/personal", "uploads");
+        string outDir = Path.Combine("/Users/vishwas.yogi/Desktop/projects/SecureLink", "uploads");
         if (!Directory.Exists(outDir))
         {
             Directory.CreateDirectory(outDir);

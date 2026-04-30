@@ -4,7 +4,7 @@ from fastapi.concurrency import run_in_threadpool
 
 class StorageService:
     def __init__(self):
-        self._base_dir = Path("/home/vishwas-yogi/personal/uploads")
+        self._base_dir = Path("/Users/vishwas.yogi/Desktop/projects/SecureLink/uploads")
         self._base_dir.mkdir(parents=False, exist_ok=True)
 
     def _get_full_path(self, storage_key: str) -> Path:
