@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0a0a0a;
+  --color-foreground: #e2e8f0;
+  --color-card: #111111;
+  --color-card-foreground: #e2e8f0;
+  --color-primary: #00ff88;
+  --color-primary-foreground: #0a0a0a;
+  --color-secondary: #ff6b35;
+  --color-secondary-foreground: #0a0a0a;
+  --color-muted: #64748b;
+  --color-muted-foreground: #64748b;
+  --color-border: #1e293b;
+  --color-error: #ff4444;
+  
+  --font-pixel: 'Press Start 2P', cursive;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-mono);
+}
+
+/* Scanline overlay effect */
+.scanlines {
+  position: relative;
+}
+
+.scanlines::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Blinking cursor effect */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.cursor-blink::after {
+  content: '_';
+  animation: blink 1s step-end infinite;
+}
+
+/* Typewriter animation */
+@keyframes typewriter {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+.typewriter {
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typewriter 2s steps(40) forwards;
+}
+
+/* Glitch effect */
+@keyframes glitch {
+  0% {
+    text-shadow: 0.05em 0 0 var(--color-secondary), -0.05em -0.025em 0 var(--color-primary);
+  }
+  14% {
+    text-shadow: 0.05em 0 0 var(--color-secondary), -0.05em -0.025em 0 var(--color-primary);
+  }
+  15% {
+    text-shadow: -0.05em -0.025em 0 var(--color-secondary), 0.025em 0.025em 0 var(--color-primary);
+  }
+  49% {
+    text-shadow: -0.05em -0.025em 0 var(--color-secondary), 0.025em 0.025em 0 var(--color-primary);
+  }
+  50% {
+    text-shadow: 0.025em 0.05em 0 var(--color-secondary), 0.05em 0 0 var(--color-primary);
+  }
+  99% {
+    text-shadow: 0.025em 0.05em 0 var(--color-secondary), 0.05em 0 0 var(--color-primary);
+  }
+  100% {
+    text-shadow: -0.025em 0 0 var(--color-secondary), -0.025em -0.025em 0 var(--color-primary);
+  }
+}
+
+.glitch {
+  animation: glitch 500ms infinite;
+}
+
+/* Glow effects */
+.glow-primary {
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.3), 0 0 40px rgba(0, 255, 136, 0.1);
+}
+
+.glow-secondary {
+  box-shadow: 0 0 20px rgba(255, 107, 53, 0.3), 0 0 40px rgba(255, 107, 53, 0.1);
+}
+
+.text-glow-primary {
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.text-glow-secondary {
+  text-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
+}
+
+/* Terminal card style */
+.terminal-card {
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  position: relative;
+}
+
+.terminal-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.05), transparent);
+  border-radius: 8px 8px 0 0;
+  pointer-events: none;
+}
+
+/* Blinking dots animation */
+@keyframes blink-dots {
+  0%, 20% { content: '.'; }
+  40% { content: '..'; }
+  60%, 100% { content: '...'; }
+}
+
+.loading-dots::after {
+  content: '';
+  animation: blink-dots 1.5s infinite;
+}
