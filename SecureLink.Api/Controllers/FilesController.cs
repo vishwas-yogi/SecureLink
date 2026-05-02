@@ -158,7 +158,7 @@ public class FilesController(
             return response.Status switch
             {
                 ResponseStatus.BadRequest => StatusCode(400, response.Error),
-                ResponseStatus.ValidationError => StatusCode(422, response.Error),
+                ResponseStatus.ValidationError => StatusCode(400, response.Error),
                 _ => StatusCode(500, response.Error),
             };
         }

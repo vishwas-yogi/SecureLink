@@ -11,7 +11,9 @@ public class LocalStoreRepository(
 ) : IStorageService
 {
     private readonly ILogger<LocalStoreRepository> _logger = logger;
-    private readonly StorageOptions _options = options.Value;
+    private readonly StorageOptions _options =
+        options.Value
+        ?? throw new ArgumentNullException(nameof(options), "StorageOptions must be configured.");
 
     public async Task<string> Upload(Stream file, string storageKey)
     {
