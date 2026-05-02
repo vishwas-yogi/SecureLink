@@ -11,4 +11,7 @@ public interface IFilesService
         Guid fileId,
         Guid currentUserId
     );
+    public Task<ServiceResult<BatchStatusResponse, ErrorDetails>> GetBatchStatus(
+        BatchFileStatusRequest request
+    );
 }

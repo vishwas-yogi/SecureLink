@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.IdentityModel.Tokens;
@@ -11,7 +12,7 @@ using SecureLink.Infrastructure.Helpers;
 using SecureLink.Infrastructure.Repositories;
 using SecureLink.Infrastructure.Services;
 
-const long maxFileLimit = 5L * 1024 * 1024 * 1024; // 5 GB
+const long maxFileLimit = 2L * 1024 * 1024 * 1024; // 2 GB
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +50,8 @@ builder.Services.AddScoped<IFilesService, FilesService>();
 builder.Services.AddScoped<FilesValidator>();
 
 // TODO: Add an S3 storage service as well.
+// Update: I'll only add S3 / R2 when the server has some traffic.
+builder.Services.Configure<StorageOptions>(builder.Configuration.GetSection("Storage"));
 builder.Services.AddSingleton<IStorageService, LocalStoreRepository>();
 builder.Services.Configure<DapperOptions>(builder.Configuration.GetSection("Dapper"));
 builder.Services.AddSingleton<IDapperContext, DapperContext>();
@@ -101,7 +104,12 @@ builder.Services.Configure<FormOptions>(options =>
     options.MultipartBodyLengthLimit = maxFileLimit;
 });
 
-builder.Services.AddControllers();
+builder
+    .Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

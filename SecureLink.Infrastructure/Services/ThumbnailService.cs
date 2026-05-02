@@ -1,6 +1,4 @@
-using Microsoft.Extensions.Logging;
 using SecureLink.Core.Contracts;
-using SecureLink.Infrastructure.Contracts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.Processing;

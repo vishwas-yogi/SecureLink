@@ -127,12 +127,26 @@ public class FilesService(
                     }
                 );
 
+                var updated = await _filesRepository.UpdateProcessingStatus(
+                    fileId,
+                    FileProcessingStatus.ThumbnailQueued
+                );
+
+                if (!updated)
+                {
+                    _logger.LogError(
+                        "Failed to update the processing status to ThumbnailQueued for file: {fileId}",
+                        fileId
+                    );
+                }
+
                 if (bufferedStream.CanSeek)
                 {
                     totalBytesRead += bufferedStream.Length;
                 }
             }
             // Else handle the metadata
+            // This is now redundant in our case but leaving it as it is for now
             else if (contentDispositionHeader!.IsFormDisposition())
             {
                 // Converting content from Stream to string
@@ -193,6 +207,44 @@ public class FilesService(
                 new FileDownloadErrorDetails { Error = "File not found" }
             );
         }
+    }
+
+    public async Task<ServiceResult<BatchStatusResponse, ErrorDetails>> GetBatchStatus(
+        BatchFileStatusRequest request
+    )
+    {
+        if (request.FileIds.Count == 0)
+        {
+            return ServiceResult<BatchStatusResponse, ErrorDetails>.BadRequest(
+                new ErrorDetails { Message = "No FileIds provided" }
+            );
+        }
+
+        var statuses = await _filesRepository.GetBatchStatus(request.FileIds, request.UserId);
+
+        // for fileIds that are invalid or don't belong to the user
+        var notFound = request.FileIds.Except(statuses.Select(s => s.FileId)).ToList();
+        if (notFound.Count != 0)
+        {
+            _logger.LogWarning(
+                "User: {userId} requested file status for invalid or unauthorized files: {fileIds}",
+                request.UserId,
+                notFound
+            );
+        }
+
+        var statusResponses = statuses
+            .Select(s => new FileProcessingStatusResponse
+            {
+                FileId = s.FileId,
+                ProcessingStatus = s.ProcessingStatus,
+                Status = s.Status,
+            })
+            .ToList();
+
+        return ServiceResult<BatchStatusResponse, ErrorDetails>.Success(
+            new BatchStatusResponse { Statuses = statusResponses }
+        );
     }
 
     private async Task<ServiceResult<FilePersistInternalResponse, FileUploadErrorDetails>> Persist(
