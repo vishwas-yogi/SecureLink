@@ -1,11 +1,19 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using SecureLink.Core.Contracts;
+using SecureLink.Infrastructure.Contracts;
 
 namespace SecureLink.Infrastructure.Repositories;
 
-public class LocalStoreRepository(ILogger<LocalStoreRepository> logger) : IStorageService
+public class LocalStoreRepository(
+    IOptions<StorageOptions> options,
+    ILogger<LocalStoreRepository> logger
+) : IStorageService
 {
     private readonly ILogger<LocalStoreRepository> _logger = logger;
+    private readonly StorageOptions _options =
+        options.Value
+        ?? throw new ArgumentNullException(nameof(options), "StorageOptions must be configured.");
 
     public async Task<string> Upload(Stream file, string storageKey)
     {
@@ -71,9 +79,9 @@ public class LocalStoreRepository(ILogger<LocalStoreRepository> logger) : IStora
         }
     }
 
-    private static string GetOutputDir()
+    private string GetOutputDir()
     {
-        string outDir = Path.Combine("/Users/vishwas.yogi/Desktop/projects/SecureLink", "uploads");
+        string outDir = Path.Combine(_options.UploadDirectory, "uploads");
         if (!Directory.Exists(outDir))
         {
             Directory.CreateDirectory(outDir);
@@ -81,7 +89,7 @@ public class LocalStoreRepository(ILogger<LocalStoreRepository> logger) : IStora
         return outDir;
     }
 
-    private static string GetFullFilePath(string filename)
+    private string GetFullFilePath(string filename)
     {
         return Path.Combine(GetOutputDir(), filename);
     }

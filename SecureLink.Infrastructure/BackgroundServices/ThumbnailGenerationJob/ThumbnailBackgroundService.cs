@@ -46,13 +46,13 @@ public class ThumbnailBackgroundService(
 
     private async Task ProcessThumbnail(ThumbnailJob job, CancellationToken token)
     {
+        using var scope = _scopeFactory.CreateScope();
+        var storageService = scope.ServiceProvider.GetRequiredService<IStorageService>();
+        var thumbnailService = scope.ServiceProvider.GetRequiredService<IThumbnailService>();
+        var filesRepository = scope.ServiceProvider.GetRequiredService<IFilesRepository>();
+
         try
         {
-            using var scope = _scopeFactory.CreateScope();
-            var storageService = scope.ServiceProvider.GetRequiredService<IStorageService>();
-            var thumbnailService = scope.ServiceProvider.GetRequiredService<IThumbnailService>();
-            var filesRepository = scope.ServiceProvider.GetRequiredService<IFilesRepository>();
-
             _logger.LogInformation("Processing thumbnail for file: {fileId}", job.FileId);
             // TODO: add cancellation token to the download method
             using var originalFile = await storageService.Download(job.StorageKey);
@@ -64,6 +64,11 @@ public class ThumbnailBackgroundService(
 
             // Update the thumbKey to db
             await filesRepository.UpdateMetadata(job.FileId, reskey);
+            // Update file processing status to ThumbnailCompleted
+            await filesRepository.UpdateProcessingStatus(
+                job.FileId,
+                FileProcessingStatus.ThumbnailCompleted
+            );
 
             // Add the thumbnail for embedding
             _logger.LogInformation(
@@ -74,11 +79,17 @@ public class ThumbnailBackgroundService(
                 new EmbeddingJob { FileId = job.FileId, ThumbnailKey = thumbKey },
                 token
             );
+
+            // Update file processing status to EmbeddingQueued
+            await filesRepository.UpdateProcessingStatus(
+                job.FileId,
+                FileProcessingStatus.EmbeddingQueued
+            );
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Processing failed for file: {fileId}", job.FileId);
-            await HandleRetry(job, token);
+            await HandleRetry(job, filesRepository, token);
         }
     }
 
@@ -98,11 +109,18 @@ public class ThumbnailBackgroundService(
         }
     }
 
-    private async Task HandleRetry(ThumbnailJob job, CancellationToken token)
+    private async Task HandleRetry(
+        ThumbnailJob job,
+        IFilesRepository filesRepository,
+        CancellationToken token
+    )
     {
         if (job.RetryCount >= _maxRetries)
         {
             _logger.LogWarning("Max retries exhausted for file: {fileId}", job.FileId);
+
+            // Update processing status to Failed after all the tries have been exhausted
+            await filesRepository.UpdateProcessingStatus(job.FileId, FileProcessingStatus.Failed);
             return;
         }
 

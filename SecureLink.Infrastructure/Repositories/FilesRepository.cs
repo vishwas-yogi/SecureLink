@@ -112,4 +112,51 @@ public class FilesRepository(ILogger<FilesRepository> logger, IDapperContext dap
         var affected = await connection.ExecuteAsync(sql, variables);
         return affected > 0;
     }
+
+    public async Task<List<FileProcessingStatusDto>> GetBatchStatus(List<Guid> fileIds, Guid userId)
+    {
+        _logger.LogInformation(
+            "GetBatchStatus repo request initiated for: {fileIds} for user: {user}",
+            fileIds,
+            userId
+        );
+
+        var sql = """
+                select 
+                    id as FileId,
+                    processing_status as ProcessingStatus,
+                    status as Status 
+                from files
+                where id = ANY(@FileIds)
+                and owner = @UserId
+            """;
+
+        var variables = new { FileIds = fileIds.ToArray(), UserId = userId };
+
+        using var connection = DbContext.CreateConnection();
+        var result = await connection.QueryAsync<FileProcessingStatusDto>(sql, variables);
+
+        return result.AsList();
+    }
+
+    public async Task<bool> UpdateProcessingStatus(Guid fileId, FileProcessingStatus updatedStatus)
+    {
+        _logger.LogInformation(
+            "UpdateFileProcessingStatus initiated for file: {fileId} with updated status: {updatedStatus}",
+            fileId,
+            updatedStatus
+        );
+
+        var sql = $"""
+                update files
+                set processing_status = @UpdatedStatus::file_processing_status
+                where id = @FileId;
+            """;
+
+        var variables = new { FileId = fileId, UpdatedStatus = updatedStatus.ToString() };
+
+        using var connection = DbContext.CreateConnection();
+        var affected = await connection.ExecuteAsync(sql, variables);
+        return affected > 0;
+    }
 }

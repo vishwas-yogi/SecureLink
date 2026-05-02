@@ -1,17 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
 using SecureLink.Api.Helpers;
 using SecureLink.Core.Contracts;
+using SecureLink.Infrastructure.Contracts;
 
 namespace SecureLink.Api.Controllers;
 
 [ApiController]
 public class EmbeddingsController(
     IEmbeddingsService embeddingsService,
+    IFilesRepository filesRepository,
     ILogger<EmbeddingsController> logger
 ) : ControllerBase
 {
     private readonly ILogger<EmbeddingsController> _logger = logger;
     private readonly IEmbeddingsService _embeddingsService = embeddingsService;
+    private readonly IFilesRepository _filesRepository = filesRepository;
 
     [InternalApiKey]
     [HttpPost]
@@ -35,6 +38,9 @@ public class EmbeddingsController(
                 "The python service failed to generate embeddings for file: {fileId}",
                 fileId
             );
+
+            // Update processing status to Failed
+            await _filesRepository.UpdateProcessingStatus(fileId, FileProcessingStatus.Failed);
             return BadRequest("Failed to generate embeddings");
         }
 
@@ -51,6 +57,11 @@ public class EmbeddingsController(
                     }),
                 ],
             }
+        );
+
+        await _filesRepository.UpdateProcessingStatus(
+            fileId,
+            FileProcessingStatus.EmbeddingCompleted
         );
 
         _logger.LogInformation("Store embeddings response: {response}", response);

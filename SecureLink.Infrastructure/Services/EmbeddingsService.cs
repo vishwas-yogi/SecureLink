@@ -116,7 +116,8 @@ public class EmbeddingsService(
                 return ServiceResult<SearchSimilarResponse, ErrorDetails>.ValidationError(
                     new ErrorDetails
                     {
-                        Message = "Invalid Image. No faces detected. Kindly, try with another image",
+                        Message =
+                            "Invalid Image. No faces detected. Kindly, try with another image",
                     }
                 );
             }
@@ -131,7 +132,7 @@ public class EmbeddingsService(
             return ServiceResult<SearchSimilarResponse, ErrorDetails>.UnexpectedError(
                 new ErrorDetails
                 {
-                    Message = "Something went wrong while trying to find the matches"
+                    Message = "Something went wrong while trying to find the matches",
                 }
             );
         }

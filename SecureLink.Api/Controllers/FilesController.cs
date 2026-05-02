@@ -138,4 +138,31 @@ public class FilesController(
 
         return Ok(response.Data);
     }
+
+    [HttpPost]
+    [Route("status/batch")]
+    public async Task<IActionResult> GetBatchStatus([FromBody] BatchFileStatusApiRequest request)
+    {
+        var currentUser = User.GetUserId();
+        if (currentUser is null)
+        {
+            return Unauthorized("Unable to resolve the logged in user");
+        }
+
+        var response = await _fileService.GetBatchStatus(
+            new BatchFileStatusRequest { FileIds = request.FileIds, UserId = currentUser.Value }
+        );
+
+        if (!response.IsSuccess)
+        {
+            return response.Status switch
+            {
+                ResponseStatus.BadRequest => StatusCode(400, response.Error),
+                ResponseStatus.ValidationError => StatusCode(400, response.Error),
+                _ => StatusCode(500, response.Error),
+            };
+        }
+
+        return Ok(response.Data);
+    }
 }
