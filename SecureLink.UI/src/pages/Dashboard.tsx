@@ -1,3 +1,4 @@
+import { Local_Storage_Keys, useAuth } from '@/lib/SecureLink'
 import { useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 
@@ -19,6 +20,7 @@ const loadingMessages = [
 ]
 
 export default function Dashboard() {
+  const { logout } = useAuth();
   const [username] = useState('DEMO_USER')
   const [uploadLogs, setUploadLogs] = useState<UploadLog[]>([])
   const [isUploading, setIsUploading] = useState(false)
@@ -89,12 +91,13 @@ export default function Dashboard() {
             >
               {'>'} SECURELINK_
             </Link>
-            <Link
-              to="/"
-              className="font-mono text-sm text-muted hover:text-secondary transition-colors border border-border px-3 py-1 hover:border-secondary"
+            <button
+            // to='/login'
+              className="font-mono text-sm text-muted hover:text-secondary transition-colors border border}-border px-3 py-1 hover:border-secondary"
+              onClick={() => logout(localStorage.getItem(Local_Storage_Keys.refreshToken)!)}
             >
               [ LOGOUT ]
-            </Link>
+            </button>
           </div>
         </div>
       </header>
