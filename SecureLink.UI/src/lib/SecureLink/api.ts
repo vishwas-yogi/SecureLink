@@ -30,9 +30,7 @@ export const uploadFiles = async (formData: FormData) => {
   const { data } = await privateApiClient.post<FileUploadResponse>(
     "/files",
     formData,
-    {
-      headers: { "Content-Type": "multipart/form-data" },
-    },
+    { headers: { "Content-Type": undefined } }, // Using undefined instead of explicitly setting is multipart to let the browser handle the content type and boundary.
   );
   return data;
 };

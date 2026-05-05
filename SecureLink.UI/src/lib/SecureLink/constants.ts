@@ -15,7 +15,7 @@ export const FileStatuses = [
 ] as const;
 
 export const Local_Storage_Keys = {
-    accessToken: 'accessToken',
-    refreshToken: 'refreshToken',
-    userId: 'userId',
-}
+  accessToken: "accessToken",
+  refreshToken: "refreshToken",
+  userId: "userId",
+};

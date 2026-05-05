@@ -40,11 +40,17 @@ export default function Dashboard() {
     ? [
         {
           message: `generating thumbnails... ${counts.thumbnailDone}/${counts.total}`,
-          status: counts.thumbnailDone === counts.total ? "done" : "processing",
+          status:
+            counts.thumbnailDone + counts.failed === counts.total
+              ? "done"
+              : "processing",
         },
         {
           message: `indexing faces... ${counts.embeddingDone}/${counts.total}`,
-          status: counts.embeddingDone === counts.total ? "done" : "processing",
+          status:
+            counts.embeddingDone + counts.failed === counts.total
+              ? "done"
+              : "processing",
         },
         ...(counts.failed > 0
           ? [
@@ -207,7 +213,10 @@ export default function Dashboard() {
                 <>
                   <div className="border-2 border-dashed border-border hover:border-primary transition-colors p-8 text-center mb-4 cursor-pointer overflow-y-auto">
                     {selectedFiles.map((f) => (
-                      <p className="font-mono text-sm text-muted">{`${f.name}   [x]`}</p>
+                      <p
+                        key={f.name}
+                        className="font-mono text-sm text-muted"
+                      >{`${f.name}   [x]`}</p>
                     ))}
                   </div>
 
@@ -215,7 +224,9 @@ export default function Dashboard() {
                     onClick={handleUpload}
                     disabled={isUploading}
                     className="w-full font-mono text-sm text-primary border border-primary hover:bg-primary hover:text-background disabled:opacity-50 px-4 py-2 transition-all"
-                  >[ CONFIRM ]</button>
+                  >
+                    [ CONFIRM ]
+                  </button>
                 </>
               )}
 

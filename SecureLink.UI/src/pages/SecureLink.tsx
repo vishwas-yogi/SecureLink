@@ -1,23 +1,34 @@
-import { Link } from 'react-router-dom'
-import Header from '../components/Header'
-import Footer from '../components/Footer'
+import { Link } from "react-router-dom";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
-const techStack = ['.NET', 'Python', 'DeepFace', 'pgvector', 'PostgreSQL', 'React', 'TypeScript', 'Docker']
+const techStack = [
+  ".NET",
+  "Python",
+  "DeepFace",
+  "pgvector",
+  "PostgreSQL",
+  "React",
+  "TypeScript",
+  "Docker",
+];
 
 const steps = [
   {
     command: "$ upload_photos --event='birthday_2024'",
-    description: 'Upload your event photos. We index every face in the background.',
+    description:
+      "Upload your event photos. We index every face in the background.",
   },
   {
-    command: '$ upload_selfie --find-me=true',
-    description: 'Take a quick selfie. Our AI extracts your facial features.',
+    command: "$ upload_selfie --find-me=true",
+    description: "Take a quick selfie. Our AI extracts your facial features.",
   },
   {
-    command: '$ profit ???',
-    description: 'Get all photos featuring you in seconds. No scrolling required.',
+    command: "$ profit ???",
+    description:
+      "Get all photos featuring you in seconds. No scrolling required.",
   },
-]
+];
 
 export default function SecureLink() {
   return (
@@ -54,11 +65,14 @@ export default function SecureLink() {
       <section id="how-it-works" className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <h2 className="font-[var(--font-pixel)] text-lg sm:text-xl text-primary mb-8 cursor-blink">
-            {'>'} HOW_IT_WORKS
+            {">"} HOW_IT_WORKS
           </h2>
           <div className="space-y-6">
             {steps.map((step, index) => (
-              <div key={index} className="terminal-card p-6 hover:glow-primary transition-all">
+              <div
+                key={index}
+                className="terminal-card p-6 hover:glow-primary transition-all"
+              >
                 <p className="font-mono text-primary text-sm sm:text-base mb-2">
                   {step.command}
                 </p>
@@ -94,31 +108,43 @@ export default function SecureLink() {
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <h2 className="font-[var(--font-pixel)] text-lg sm:text-xl text-primary mb-8 cursor-blink">
-            {'>'} FEATURES.list
+            {">"} FEATURES.list
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="terminal-card p-6">
-              <h3 className="font-mono text-secondary text-sm mb-2">// PRIVACY_FIRST</h3>
+              <h3 className="font-mono text-secondary text-sm mb-2">
+                // PRIVACY_FIRST
+              </h3>
               <p className="font-mono text-muted text-sm">
-                Your photos never leave our secure servers. Face embeddings are stored, not your actual face data.
+                Your photos never leave our secure servers. Face embeddings are
+                stored, not your actual face data.
               </p>
             </div>
             <div className="terminal-card p-6">
-              <h3 className="font-mono text-secondary text-sm mb-2">// BLAZING_FAST</h3>
+              <h3 className="font-mono text-secondary text-sm mb-2">
+                // BLAZING_FAST
+              </h3>
               <p className="font-mono text-muted text-sm">
-                Vector similarity search powered by pgvector. Results in milliseconds, not minutes.
+                Vector similarity search powered by pgvector. Results in
+                milliseconds, not minutes.
               </p>
             </div>
             <div className="terminal-card p-6">
-              <h3 className="font-mono text-secondary text-sm mb-2">// ACCURATE_AF</h3>
+              <h3 className="font-mono text-secondary text-sm mb-2">
+                // ACCURATE_AF
+              </h3>
               <p className="font-mono text-muted text-sm">
-                DeepFace provides state-of-the-art facial recognition. Even finds you in group photos.
+                DeepFace provides state-of-the-art facial recognition. Even
+                finds you in group photos.
               </p>
             </div>
             <div className="terminal-card p-6">
-              <h3 className="font-mono text-secondary text-sm mb-2">// BATCH_UPLOAD</h3>
+              <h3 className="font-mono text-secondary text-sm mb-2">
+                // BATCH_UPLOAD
+              </h3>
               <p className="font-mono text-muted text-sm">
-                Drop hundreds of photos at once. We handle the processing in the background.
+                Drop hundreds of photos at once. We handle the processing in the
+                background.
               </p>
             </div>
           </div>
@@ -130,7 +156,7 @@ export default function SecureLink() {
         <div className="max-w-4xl mx-auto text-center">
           <div className="terminal-card p-8 glow-secondary border-secondary">
             <h2 className="font-[var(--font-pixel)] text-lg text-secondary mb-4">
-              {'>'} READY_TO_START?
+              {">"} READY_TO_START?
             </h2>
             <p className="font-mono text-muted mb-6">
               Stop scrolling. Start finding.
@@ -147,5 +173,5 @@ export default function SecureLink() {
 
       <Footer />
     </div>
-  )
+  );
 }

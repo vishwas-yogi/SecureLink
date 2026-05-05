@@ -6,7 +6,7 @@ import { useAuth } from "./useAuth";
 
 export const useLogin = () => {
   const navigate = useNavigate();
-  const { setStoredUserId } = useAuth()
+  const { setStoredUserId } = useAuth();
 
   return useMutation({
     mutationFn: loginApi,

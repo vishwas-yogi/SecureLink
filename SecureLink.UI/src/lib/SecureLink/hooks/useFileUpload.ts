@@ -58,7 +58,7 @@ export const useFileUpload = () => {
       }
     : null;
 
-  const { mutateAsync: upload, isPending } = useMutation({
+  const { mutate: upload, isPending } = useMutation({
     mutationFn: (formData: FormData) => uploadFiles(formData),
     onSuccess: (response) => {
       const successfulIds = response.filter((r) => !r.isError).map((r) => r.id);

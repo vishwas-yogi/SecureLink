@@ -50,7 +50,9 @@ privateApiClient.interceptors.response.use(
       originalRequest &&
       !originalRequest._retry
     ) {
-      const refreshToken = localStorage.getItem(Local_Storage_Keys.refreshToken);
+      const refreshToken = localStorage.getItem(
+        Local_Storage_Keys.refreshToken,
+      );
       const userId = localStorage.getItem(Local_Storage_Keys.userId);
 
       // Return if tokens are missing
