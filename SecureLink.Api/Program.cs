@@ -16,6 +16,18 @@ const long maxFileLimit = 2L * 1024 * 1024 * 1024; // 2 GB
 
 var builder = WebApplication.CreateBuilder(args);
 
+// CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSecureLinkFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 var jwtSettings =
     builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()
     ?? throw new InvalidOperationException(
@@ -140,6 +152,8 @@ if (app.Environment.IsDevelopment() || args.Contains("--migrate"))
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowSecureLinkFrontend");
 
 app.UseAuthentication();
 
