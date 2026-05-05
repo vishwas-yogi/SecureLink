@@ -20,8 +20,7 @@ const loadingMessages = [
 ]
 
 export default function Dashboard() {
-  const { logout } = useAuth();
-  const [username] = useState('DEMO_USER')
+  const { user, logout } = useAuth();
   const [uploadLogs, setUploadLogs] = useState<UploadLog[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
@@ -92,8 +91,7 @@ export default function Dashboard() {
               {'>'} SECURELINK_
             </Link>
             <button
-            // to='/login'
-              className="font-mono text-sm text-muted hover:text-secondary transition-colors border border}-border px-3 py-1 hover:border-secondary"
+              className="font-mono text-sm text-muted hover:text-secondary transition-colors border border-border px-3 py-1 hover:border-secondary"
               onClick={() => logout(localStorage.getItem(Local_Storage_Keys.refreshToken)!)}
             >
               [ LOGOUT ]
@@ -107,7 +105,7 @@ export default function Dashboard() {
           {/* Welcome */}
           <div className="mb-8">
             <h1 className="font-[var(--font-pixel)] text-lg sm:text-xl text-primary cursor-blink">
-              {'>'} HELLO, {username}_
+              {'>'} HELLO, {user?.name}_
             </h1>
           </div>
 

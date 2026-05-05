@@ -44,7 +44,7 @@ export type UploadFileResponse = {
   error?: string;
 }[];
 
-export type FileUplaodRequest = {
+export type FileUploadRequest = {
   files: File[];
 };
 
@@ -68,7 +68,7 @@ export type BatchFileStatusResponse = {
     fileId: string;
     processingStatus: FileProcessingStatus;
     status: FileStatus;
-  };
+  }[];
 };
 
 export type FileProcessingStatus = (typeof FileProcessingStatuses)[number];

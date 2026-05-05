@@ -2,17 +2,17 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { RefreshTokenResponse, RefreshTokensRequest } from "./types";
 import { Local_Storage_Keys } from "./constants";
 
-const BASE_URL = "http://localhost:5009";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5009";
 
 export const privateApiClient = axios.create({
   baseURL: BASE_URL,
-  headers: { "Content-Type": "application//json" },
+  headers: { "Content-Type": "application/json" },
 });
 
 // Interceptor for handling Bearer token
 privateApiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem("accessToken");
+    const token = localStorage.getItem(Local_Storage_Keys.accessToken);
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -45,9 +45,13 @@ privateApiClient.interceptors.response.use(
     const originalRequest = error.config as CustomRequestConfig;
 
     // Check for 401 and try only once
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      const refreshToken = localStorage.getItem("refreshToken");
-      const userId = localStorage.getItem("userId");
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry
+    ) {
+      const refreshToken = localStorage.getItem(Local_Storage_Keys.refreshToken);
+      const userId = localStorage.getItem(Local_Storage_Keys.userId);
 
       // Return if tokens are missing
       if (!refreshToken || !userId) {
@@ -82,7 +86,10 @@ privateApiClient.interceptors.response.use(
         );
 
         localStorage.setItem(Local_Storage_Keys.accessToken, data.accessToken);
-        localStorage.setItem(Local_Storage_Keys.refreshToken, data.refreshToken);
+        localStorage.setItem(
+          Local_Storage_Keys.refreshToken,
+          data.refreshToken,
+        );
 
         // Use the new token
         processQueue(null, data.accessToken);

@@ -1,5 +1,5 @@
 export const FileProcessingStatuses = [
-  "Uknown",
+  "Unknown",
   "ThumbnailQueued",
   "ThumbnailCompleted",
   "EmbeddingQueued",
@@ -18,5 +18,4 @@ export const Local_Storage_Keys = {
     accessToken: 'accessToken',
     refreshToken: 'refreshToken',
     userId: 'userId',
-    username: 'username',
 }

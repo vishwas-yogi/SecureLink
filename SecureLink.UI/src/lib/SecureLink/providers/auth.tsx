@@ -14,7 +14,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const queryClient = useQueryClient();
 
   const storedUserId = localStorage.getItem(Local_Storage_Keys.userId);
-  const storedUsername = localStorage.getItem(Local_Storage_Keys.username);
 
   const {
     data: user,
@@ -24,13 +23,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     queryKey: ["user", storedUserId],
     enabled: !!storedUserId,
     queryFn: () => getUser(storedUserId!),
-    placeholderData:
-      storedUserId && storedUsername
-        ? ({
-            userId: storedUserId,
-            username: storedUsername,
-          } as unknown as UserResponse)
-        : undefined,
     staleTime: Infinity,
   });
 
@@ -54,7 +46,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isLoading,
       logout,
     }),
-    [user, isLoading, isError],
+    [user, isLoading, isError, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

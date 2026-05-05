@@ -12,7 +12,6 @@ export const useLogin = () => {
       localStorage.setItem(Local_Storage_Keys.accessToken, data.accessToken);
       localStorage.setItem(Local_Storage_Keys.refreshToken, data.refreshToken);
       localStorage.setItem(Local_Storage_Keys.userId, data.userId);
-      localStorage.setItem(Local_Storage_Keys.username, data.username);
 
       navigate("/dashboard");
     },
