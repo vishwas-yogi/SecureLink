@@ -37,7 +37,7 @@ export type LogoutRequest = {
 export type LogoutResponse = {};
 
 // File types
-export type UploadFileResponse = {
+export type FileUploadResponse = {
   id: string;
   filename: string;
   isError: boolean;
@@ -91,4 +91,5 @@ export type AuthContextType = {
   isAuthenticated: boolean;
   isLoading: boolean;
   logout: (refreshToken: string) => void;
+  setStoredUserId: (userId: string | null) => void;
 };

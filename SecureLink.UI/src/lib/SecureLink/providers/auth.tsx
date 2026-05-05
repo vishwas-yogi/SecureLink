@@ -1,8 +1,14 @@
-import { createContext, PropsWithChildren, useCallback, useMemo } from "react";
+import {
+  createContext,
+  PropsWithChildren,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getUser, logoutApi } from "../api";
 import { Local_Storage_Keys } from "../constants";
-import { AuthContextType, UserResponse } from "../types";
+import { AuthContextType } from "../types";
 
 export const AuthContext = createContext<AuthContextType | undefined>(
   undefined,
@@ -13,7 +19,9 @@ type AuthProviderProps = {} & PropsWithChildren;
 export function AuthProvider({ children }: AuthProviderProps) {
   const queryClient = useQueryClient();
 
-  const storedUserId = localStorage.getItem(Local_Storage_Keys.userId);
+  const [storedUserId, setStoredUserId] = useState<string | null>(
+    localStorage.getItem(Local_Storage_Keys.userId),
+  );
 
   const {
     data: user,
@@ -42,11 +50,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const value = useMemo(
     () => ({
       user,
-      isAuthenticated: !!user && !isError,
+      isAuthenticated: !!storedUserId && !isError,
       isLoading,
       logout,
+      setStoredUserId,
     }),
-    [user, isLoading, isError, logout],
+    [user, isLoading, isError, logout, storedUserId],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
