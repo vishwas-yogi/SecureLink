@@ -1,3 +1,4 @@
+import { RefObject } from "react";
 import { createPortal } from "react-dom";
 
 export const CameraModal = ({
@@ -6,8 +7,8 @@ export const CameraModal = ({
   onCapture,
   onClose,
 }: {
-  videoRef: React.RefObject<HTMLVideoElement | null>;
-  canvasRef: React.RefObject<HTMLCanvasElement | null>;
+  videoRef: RefObject<HTMLVideoElement | null>;
+  canvasRef: RefObject<HTMLCanvasElement | null>;
   onCapture: () => void;
   onClose: () => void;
 }) => {
@@ -32,6 +33,7 @@ export const CameraModal = ({
             ref={videoRef}
             autoPlay
             playsInline
+            muted
             className="w-full h-full object-cover"
             style={{ transform: "scaleX(-1)" }} // Mirror for natural feel
           />

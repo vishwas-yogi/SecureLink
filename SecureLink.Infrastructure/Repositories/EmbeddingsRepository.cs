@@ -1,6 +1,5 @@
 using Dapper;
 using SecureLink.Core.Contracts;
-using SecureLink.Core.Entities;
 using SecureLink.Infrastructure.Contracts;
 
 namespace SecureLink.Infrastructure.Repositories;

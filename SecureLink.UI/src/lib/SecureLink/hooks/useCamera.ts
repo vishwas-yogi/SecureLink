@@ -15,7 +15,6 @@ export const useCamera = () => {
         video: { facingMode: "user" },
       });
 
-      // 1. Store the stream and flip the active switch IMMEDIATELY
       setStream(mediaStream);
       setIsActive(true);
     } catch (err) {
@@ -24,11 +23,13 @@ export const useCamera = () => {
     }
   }, []);
 
-  // 2. Reactively attach the stream whenever the video element mounts
   useEffect(() => {
     if (isActive && stream && videoRef.current) {
       videoRef.current.srcObject = stream;
     }
+    return () => {
+      stream?.getTracks().forEach((track) => track.stop());
+    };
   }, [isActive, stream]);
 
   const stop = useCallback(() => {
@@ -46,6 +47,8 @@ export const useCamera = () => {
       const canvas = canvasRef.current;
       const video = videoRef.current;
       const context = canvas.getContext("2d");
+
+      if(!context) return resolve(null);
 
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;

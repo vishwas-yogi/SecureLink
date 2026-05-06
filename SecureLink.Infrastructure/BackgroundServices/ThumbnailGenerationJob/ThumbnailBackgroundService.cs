@@ -59,7 +59,7 @@ public class ThumbnailBackgroundService(
             using var thumbStream = await thumbnailService.CreateThumbnail(originalFile);
 
             var thumbFilename = $"{Path.GetFileNameWithoutExtension(job.Filename)}_thumbnail";
-            var thumbKey = Path.ChangeExtension(thumbFilename, ".webp");
+            var thumbKey = $"{Guid.NewGuid()}.webp";
             await storageService.Upload(thumbStream, thumbKey);
 
             // Update the thumbKey to db

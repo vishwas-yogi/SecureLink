@@ -100,11 +100,6 @@ export default function Dashboard() {
 
   const allLogs = [...uploadLogs, ...processingLogs];
 
-  // for (let i = 0; i < loadingMessages.length; i++) {
-  //   setSearchStep(i);
-  //   await new Promise((resolve) => setTimeout(resolve, 800));
-  // }
-
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const files = Array.from(e.dataTransfer!.files).filter((f) =>
@@ -122,6 +117,7 @@ export default function Dashboard() {
 
     if (files.length > 1) {
       alert("Please upload only one image.");
+      return;
     }
     setSelfie(files[0]);
   };
@@ -293,6 +289,14 @@ export default function Dashboard() {
                     onDrop={handleSelfieDrop}
                     onDragOver={(e) => e.preventDefault()}
                     onClick={() => selfieInputRef.current?.click()}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        selfieInputRef.current?.click();
+                      }
+                    }}
                   >
                     <input
                       ref={selfieInputRef}
@@ -367,6 +371,12 @@ export default function Dashboard() {
                       </p>
                     ))}
                   </div>
+                </div>
+              ) : isError ? (
+                <div className="text-center py-8">
+                  <p className="font-mono text-sm text-secondary">
+                    SEARCH_FAILED — please retry with another selfie.
+                  </p>
                 </div>
               ) : searchMatches.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
