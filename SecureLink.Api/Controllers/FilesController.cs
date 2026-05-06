@@ -102,6 +102,32 @@ public class FilesController(
         return File(fileStream!, contentType, fileDetails.UserFilename, true);
     }
 
+    [AllowAnonymous] // TODO: Add signed urls later
+    [HttpGet]
+    [Route("thumbnail/{thumbKey}")]
+    public async Task<ActionResult> DownloadThumbnail([FromRoute] string thumbKey)
+    {
+        _logger.LogInformation(
+            "Controller DownloadThumbnail invoked with Request: {Request}",
+            Request
+        );
+
+        var response = await _fileService.DownloadThumbnail(thumbKey);
+
+        if (!response.IsSuccess)
+        {
+            return response.Status switch
+            {
+                ResponseStatus.ValidationError => StatusCode(400, response.Error),
+                ResponseStatus.NotFound => StatusCode(404, response.Error),
+                _ => StatusCode(500, "An unexpected error occurred"),
+            };
+        }
+
+        // File() already sets the Status code to 200. So no need to wrap it in Ok()
+        return File(response.Data!, "image/webp");
+    }
+
     [HttpPost]
     [Route("search")]
     public async Task<ActionResult> Search(IFormFile selfie)

@@ -1,8 +1,10 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using SecureLink.Core;
 using SecureLink.Core.Contracts;
+using SecureLink.Core.Entities;
 using SecureLink.Infrastructure.Contracts;
 using SecureLink.Infrastructure.Helpers;
 
@@ -204,6 +206,27 @@ public class FilesService(
         catch (FileNotFoundException)
         {
             return ServiceResult<FileDownloadServiceResponse, FileDownloadErrorDetails>.NotFound(
+                new FileDownloadErrorDetails { Error = "File not found" }
+            );
+        }
+    }
+
+    public async Task<ServiceResult<Stream, FileDownloadErrorDetails>> DownloadThumbnail(
+        string thumbKey
+    )
+    {
+        var fileValidation = await _validator.ValidateFileForDownload(thumbKey);
+        if (!fileValidation.IsValid)
+            return ServiceResult<Stream, FileDownloadErrorDetails>.NotFound(fileValidation.Error!);
+
+        try
+        {
+            var fileStream = await _storageService.Download(thumbKey);
+            return ServiceResult<Stream, FileDownloadErrorDetails>.Success(fileStream);
+        }
+        catch (FileNotFoundException)
+        {
+            return ServiceResult<Stream, FileDownloadErrorDetails>.NotFound(
                 new FileDownloadErrorDetails { Error = "File not found" }
             );
         }

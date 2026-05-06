@@ -9,11 +9,13 @@ namespace SecureLink.Infrastructure.Services;
 
 public class EmbeddingsService(
     IEmbeddingsRepository repository,
+    IFilesRepository filesRepository,
     IHttpClientFactory factory,
     ILogger<EmbeddingsService> logger
 ) : IEmbeddingsService
 {
     private readonly IEmbeddingsRepository _repo = repository;
+    private readonly IFilesRepository _filesRepository = filesRepository;
     private readonly IHttpClientFactory _factory = factory;
     private readonly ILogger<EmbeddingsService> _logger = logger;
     private static readonly JsonSerializerOptions _options = new()

@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using SecureLink.Core.Contracts;
 
 namespace SecureLink.Core.Entities;
@@ -16,4 +17,10 @@ public class StoredFile
     public string Metadata { get; set; } = "{}";
     public DateTimeOffset? CreatedAt { get; set; }
     public DateTimeOffset? LastModifiedAt { get; set; }
+}
+
+public class FileMetadata
+{
+    [JsonPropertyName("thumbkey")]
+    public string? ThumbKey { get; set; }
 }

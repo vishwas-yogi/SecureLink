@@ -1,5 +1,6 @@
 using Dapper;
 using SecureLink.Core.Contracts;
+using SecureLink.Core.Entities;
 using SecureLink.Infrastructure.Contracts;
 
 namespace SecureLink.Infrastructure.Repositories;
@@ -53,10 +54,14 @@ public class EmbeddingsRepository(IDapperContext dapperContext)
                         from face_embeddings
                         order by file_id, embedding <=> @InputVector::vector
                     )
-                    select file_id, best_match_score as match_score
-                    from best_matches
-                    where best_match_score > @Threshold
-                    order by best_match_score desc;
+                    select 
+                        m.file_id as file_id, 
+                        m.best_match_score as match_score,
+                        f.metadata->>'thumbkey' as thumb_key
+                    from best_matches m
+                    join files f on m.file_id = f.id
+                    where m.best_match_score > @Threshold
+                    order by m.best_match_score desc;
             """;
 
         var variables = new { InputVector = face.Embedding, Threshold = 0.45 };

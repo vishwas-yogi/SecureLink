@@ -60,10 +60,10 @@ public class ThumbnailBackgroundService(
 
             var thumbFilename = $"{Path.GetFileNameWithoutExtension(job.Filename)}_thumbnail";
             var thumbKey = Path.ChangeExtension(thumbFilename, ".webp");
-            var reskey = await storageService.Upload(thumbStream, thumbKey);
+            await storageService.Upload(thumbStream, thumbKey);
 
             // Update the thumbKey to db
-            await filesRepository.UpdateMetadata(job.FileId, reskey);
+            await filesRepository.UpdateMetadata(job.FileId, thumbKey);
             // Update file processing status to ThumbnailCompleted
             await filesRepository.UpdateProcessingStatus(
                 job.FileId,

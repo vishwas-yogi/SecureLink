@@ -19,13 +19,17 @@ var builder = WebApplication.CreateBuilder(args);
 // CORS policy
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSecureLinkFrontend", policy =>
-    {
-        policy.WithOrigins("http://localhost:5173")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
-    });
+    options.AddPolicy(
+        "AllowSecureLinkFrontend",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        }
+    );
 });
 
 var jwtSettings =
