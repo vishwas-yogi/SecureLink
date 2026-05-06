@@ -2,6 +2,7 @@ import { privateApiClient, publicApiClient } from "./apiClient";
 import {
   BatchFileStatusRequest,
   BatchFileStatusResponse,
+  FileSearchResponse,
   FileUploadResponse,
   LoginRequest,
   LoginResponse,
@@ -39,6 +40,15 @@ export const getBatchStatus = async (request: BatchFileStatusRequest) => {
   const { data } = await privateApiClient.post<BatchFileStatusResponse>(
     "/files/status/batch",
     request,
+  );
+  return data;
+};
+
+export const findMatches = async (formData: FormData) => {
+  const { data } = await privateApiClient.post<FileSearchResponse>(
+    "/files/search",
+    formData,
+    { headers: { "Content-Type": undefined } },
   );
   return data;
 };

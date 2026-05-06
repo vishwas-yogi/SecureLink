@@ -19,3 +19,5 @@ export const Local_Storage_Keys = {
   refreshToken: "refreshToken",
   userId: "userId",
 };
+
+export const Supported_File_Types = ["image/png", "image/jpeg"] as const;

@@ -52,11 +52,14 @@ export type FileSearchRequest = {
   files: File[];
 };
 
+export type SearchMatch = {
+  fileId: string;
+  matchScore: number;
+  thumbKey: string;
+};
+
 export type FileSearchResponse = {
-  matches: {
-    fileId: string;
-    matchScore: number;
-  }[];
+  matches: SearchMatch[];
 };
 
 export type BatchFileStatusRequest = {
