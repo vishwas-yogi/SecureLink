@@ -9,4 +9,5 @@ public record Match
 {
     public required Guid FileId { get; init; }
     public required float MatchScore { get; init; }
+    public required string ThumbKey { get; init; }
 }

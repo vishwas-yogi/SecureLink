@@ -1,17 +1,19 @@
-import { useState, useCallback, DragEvent, useRef } from "react";
+import { useState, DragEvent, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
+  CameraModal,
   Local_Storage_Keys,
   UploadLog,
   useAuth,
+  useCamera,
+  useFileSearch,
   useFileUpload,
 } from "@/lib/SecureLink";
-import { Link } from "react-router-dom";
 
-interface SearchResult {
-  id: string;
-  thumbnail: string;
-  matchScore: number;
-}
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5009";
+
+const THUMBNAIL_BASE = `${API_BASE_URL}/files/thumbnail`;
 
 const loadingMessages = [
   "scanning face geometry...",
@@ -29,12 +31,45 @@ export default function Dashboard() {
     handleUpload,
     counts,
   } = useFileUpload();
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
+
+  const {
+    searchMatches,
+    selfie,
+    setSelfie,
+    isSearching,
+    isError,
+    handleSearch,
+  } = useFileSearch();
+
+  const {
+    isActive: isCameraActive,
+    videoRef,
+    canvasRef,
+    start,
+    stop,
+    capture,
+  } = useCamera();
+
   const [searchStep, setSearchStep] = useState(0);
-  const [hasSearched, setHasSearched] = useState(false);
+
+  useEffect(() => {
+    if (!isSearching) {
+      return;
+    }
+
+    let index = 0;
+    setSearchStep(0);
+
+    const interval = setInterval(() => {
+      index = (index + 1) % loadingMessages.length;
+      setSearchStep(index);
+    }, 700);
+
+    return () => clearInterval(interval);
+  }, [isSearching]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const selfieInputRef = useRef<HTMLInputElement>(null);
 
   const processingLogs: UploadLog[] = counts
     ? [
@@ -65,59 +100,34 @@ export default function Dashboard() {
 
   const allLogs = [...uploadLogs, ...processingLogs];
 
-  const simulateSearch = useCallback(async () => {
-    setIsSearching(true);
-    setSearchResults([]);
-    setHasSearched(true);
-
-    for (let i = 0; i < loadingMessages.length; i++) {
-      setSearchStep(i);
-      await new Promise((resolve) => setTimeout(resolve, 800));
-    }
-
-    // Mock results
-    setSearchResults([
-      {
-        id: "1",
-        thumbnail: "https://picsum.photos/seed/face1/200/200",
-        matchScore: 98,
-      },
-      {
-        id: "2",
-        thumbnail: "https://picsum.photos/seed/face2/200/200",
-        matchScore: 94,
-      },
-      {
-        id: "3",
-        thumbnail: "https://picsum.photos/seed/face3/200/200",
-        matchScore: 87,
-      },
-      {
-        id: "4",
-        thumbnail: "https://picsum.photos/seed/face4/200/200",
-        matchScore: 82,
-      },
-      {
-        id: "5",
-        thumbnail: "https://picsum.photos/seed/face5/200/200",
-        matchScore: 76,
-      },
-      {
-        id: "6",
-        thumbnail: "https://picsum.photos/seed/face6/200/200",
-        matchScore: 71,
-      },
-    ]);
-
-    setIsSearching(false);
-  }, []);
-
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const files = Array.from(e.dataTransfer!.files).filter((f) =>
       f.type.startsWith("image/"),
     );
     setSelectedFiles((prev) => [...prev, ...files]);
+  };
+
+  const handleSelfieDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const files = Array.from(e.dataTransfer!.files).filter((f) =>
+      f.type.startsWith("image/"),
+    );
+    if (files.length === 0) return;
+
+    if (files.length > 1) {
+      alert("Please upload only one image.");
+      return;
+    }
+    setSelfie(files[0]);
+  };
+
+  const handleCapture = async () => {
+    const file = await capture();
+    if (file) {
+      setSelfie(file);
+      stop();
+    }
   };
 
   return (
@@ -250,6 +260,15 @@ export default function Dashboard() {
               )}
             </div>
 
+            {isCameraActive && (
+              <CameraModal
+                videoRef={videoRef}
+                canvasRef={canvasRef}
+                onCapture={handleCapture}
+                onClose={stop}
+              />
+            )}
+
             {/* Find My Photos Card */}
             <div className="terminal-card p-6">
               <div className="flex items-center gap-3 mb-4">
@@ -263,31 +282,75 @@ export default function Dashboard() {
                 it.
               </p>
 
-              <div
-                className="border-2 border-dashed border-border hover:border-secondary transition-colors p-8 text-center mb-4 cursor-pointer"
-                onClick={simulateSearch}
-              >
-                <p className="font-mono text-sm text-muted">
-                  {isSearching ? "SCANNING..." : "DROP SELFIE HERE"}
-                </p>
-              </div>
+              {!selfie && (
+                <>
+                  <div
+                    className="border-2 border-dashed border-border hover:border-secondary transition-colors p-8 text-center mb-4 cursor-pointer"
+                    onDrop={handleSelfieDrop}
+                    onDragOver={(e) => e.preventDefault()}
+                    onClick={() => selfieInputRef.current?.click()}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        selfieInputRef.current?.click();
+                      }
+                    }}
+                  >
+                    <input
+                      ref={selfieInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) =>
+                        setSelfie(e.target?.files ? e.target.files[0] : null)
+                      }
+                    />
+                    <p className="font-mono text-sm text-muted">
+                      {isSearching
+                        ? "SCANNING..."
+                        : "DROP / SELECT SELFIE HERE"}
+                    </p>
+                  </div>
 
-              <button
-                onClick={simulateSearch}
-                disabled={isSearching}
-                className="w-full font-mono text-sm text-background bg-secondary hover:bg-secondary/90 disabled:opacity-50 px-4 py-2 glow-secondary transition-all"
-              >
-                [ SCAN MY FACE ]
-              </button>
+                  <button
+                    onClick={start}
+                    disabled={isSearching}
+                    className="w-full font-mono text-sm text-background bg-secondary hover:bg-secondary/90 px-4 py-2 glow-secondary transition-all"
+                  >
+                    [ SCAN MY FACE ]
+                  </button>
+                </>
+              )}
+
+              {selfie && (
+                <>
+                  <div className="border-2 border-dashed border-border hover:border-secondary transition-colors p-8 text-center mb-4 cursor-pointer">
+                    <p
+                      key={selfie.name}
+                      className="font-mono text-sm text-muted"
+                    >{`${selfie.name}   [x]`}</p>
+                  </div>
+
+                  <button
+                    onClick={handleSearch}
+                    disabled={isSearching}
+                    className="w-full font-mono text-sm text-primary border border-primary hover:bg-primary hover:text-background disabled:opacity-50 px-4 py-2 transition-all"
+                  >
+                    [ CONFIRM ]
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
           {/* Results Section */}
-          {(isSearching || hasSearched) && (
+          {(isSearching || searchMatches.length > 0) && (
             <div className="terminal-card p-6">
               <h2 className="font-[var(--font-pixel)] text-sm text-primary mb-6 cursor-blink">
                 {">"} MATCHES_FOUND:{" "}
-                {isSearching ? "..." : searchResults.length}
+                {isSearching ? "..." : searchMatches.length}
               </h2>
 
               {isSearching ? (
@@ -309,18 +372,24 @@ export default function Dashboard() {
                     ))}
                   </div>
                 </div>
-              ) : searchResults.length > 0 ? (
+              ) : isError ? (
+                <div className="text-center py-8">
+                  <p className="font-mono text-sm text-secondary">
+                    SEARCH_FAILED — please retry with another selfie.
+                  </p>
+                </div>
+              ) : searchMatches.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                  {searchResults.map((result) => (
+                  {searchMatches.map((result) => (
                     <div
-                      key={result.id}
+                      key={result.fileId}
                       className={`relative group cursor-pointer ${
                         result.matchScore >= 90 ? "glow-primary" : ""
                       }`}
                     >
                       <img
-                        src={result.thumbnail}
-                        alt={`Match ${result.id}`}
+                        src={`${THUMBNAIL_BASE}/${result.thumbKey}`}
+                        alt={`Match ${result.fileId}`}
                         className="w-full aspect-square object-cover border border-border group-hover:border-primary transition-colors"
                         crossOrigin="anonymous"
                       />

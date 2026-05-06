@@ -14,4 +14,5 @@ public interface IFilesService
     public Task<ServiceResult<BatchStatusResponse, ErrorDetails>> GetBatchStatus(
         BatchFileStatusRequest request
     );
+    public Task<ServiceResult<Stream, FileDownloadErrorDetails>> DownloadThumbnail(string thumbKey);
 }
