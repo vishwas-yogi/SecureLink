@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginFormData, loginSchema, useLogin } from "@/lib/SecureLink";
@@ -101,6 +102,18 @@ export default function Login() {
                 )}
               </div>
             </form>
+
+            <div className="mt-8 pt-6 border-t border-border">
+              <p className="font-mono text-xs text-muted text-center mb-3">
+                // don&apos;t have an account?
+              </p>
+              <Link
+                to="/register"
+                className="block text-center font-mono text-sm text-primary hover:text-secondary transition-colors underline"
+              >
+                [ SIGN UP ]
+              </Link>
+            </div>
           </div>
         </div>
       </main>

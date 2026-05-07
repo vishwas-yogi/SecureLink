@@ -42,7 +42,10 @@ public class AuthController(IAuthService authService) : ControllerBase
 
         if (!response.IsSuccess)
         {
-            if (response.Status == ResponseStatus.BadRequest)
+            if (
+                response.Status == ResponseStatus.BadRequest
+                || response.Status == ResponseStatus.ValidationError
+            )
             {
                 return BadRequest(response.Error);
             }
