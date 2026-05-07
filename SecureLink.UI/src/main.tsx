@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import "./index.css";
 import { ProtectedRoute } from "./lib/SecureLink";
 import { AuthProvider } from "./lib/SecureLink/providers";
+import Register from "./pages/Register";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Routes>
             <Route path="/" element={<Portfolio />} />
             <Route path="/securelink" element={<SecureLink />} />
+            <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route
               path="/dashboard"

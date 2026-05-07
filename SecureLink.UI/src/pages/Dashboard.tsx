@@ -396,14 +396,14 @@ export default function Dashboard() {
                       <div className="absolute bottom-0 left-0 right-0 bg-background/90 px-2 py-1">
                         <p
                           className={`font-mono text-[10px] ${
-                            result.matchScore >= 90
+                            result.matchScore >= 0.6
                               ? "text-primary"
-                              : result.matchScore >= 80
+                              : result.matchScore >= 0.5
                                 ? "text-secondary"
                                 : "text-muted"
                           }`}
                         >
-                          MATCH: {result.matchScore}%
+                          MATCH: {(result.matchScore * 100).toFixed(0)}%
                         </p>
                       </div>
                     </div>

@@ -7,6 +7,7 @@ import {
   LoginRequest,
   LoginResponse,
   LogoutRequest,
+  RegisterRequest,
   UserResponse,
 } from "./types";
 
@@ -20,6 +21,10 @@ export const loginApi = async (request: LoginRequest) => {
 
 export const logoutApi = async (request: LogoutRequest) => {
   await privateApiClient.post("/auth/logout", request);
+};
+
+export const registerApi = async (request: RegisterRequest) => {
+  await publicApiClient.post("/auth/register", request);
 };
 
 export const getUser = async (userId: string) => {

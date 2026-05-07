@@ -186,7 +186,7 @@ public class AuthService(
         if (!passwordValidation.IsValid)
         {
             return ServiceResult<bool, UserErrorDetails>.BadRequest(
-                new UserErrorDetails { PasswordError = passwordValidation.Error!.Message }
+                new UserErrorDetails { Password = passwordValidation.Error!.Message }
             );
         }
 
@@ -202,6 +202,11 @@ public class AuthService(
 
         if (!response.IsSuccess)
         {
+            // User service returns Validation error for invalid input
+            if (response.Status == ResponseStatus.ValidationError)
+            {
+                return ServiceResult<bool, UserErrorDetails>.ValidationError(response.Error!);
+            }
             return ServiceResult<bool, UserErrorDetails>.UnexpectedError(response.Error!);
         }
 
