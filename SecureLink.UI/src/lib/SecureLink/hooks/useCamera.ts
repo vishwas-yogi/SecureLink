@@ -48,7 +48,7 @@ export const useCamera = () => {
       const video = videoRef.current;
       const context = canvas.getContext("2d");
 
-      if(!context) return resolve(null);
+      if (!context) return resolve(null);
 
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;

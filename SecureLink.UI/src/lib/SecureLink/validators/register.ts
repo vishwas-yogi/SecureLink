@@ -34,9 +34,9 @@ const passwordSchema = z.string().superRefine((val, ctx) => {
 });
 
 export const registerSchema = z.object({
-  username: z.string().min(1, "// error: Username cannot be empty"),
+  username: z.string().trim().min(1, "// error: Username cannot be empty"),
   password: passwordSchema,
-  name: z.string().min(1, "// error: Name cannot be empty"),
+  name: z.string().trim().min(1, "// error: Name cannot be empty"),
   email: z.email("// error: Invalid email"),
 });
 

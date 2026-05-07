@@ -43,16 +43,26 @@ export default function Register() {
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 400) {
         const apiErrors = err.response.data;
-        Object.entries(apiErrors).forEach(([field, message]) => {
-          if (!message) return;
+        const allowed: Array<keyof RegisterFormData> = [
+          "name",
+          "email",
+          "username",
+          "password",
+        ];
+
+        Object.entries(apiErrors).forEach(([rawField, rawMessage]) => {
+          if (typeof rawMessage !== "string" || !rawMessage) return;
+          const field = rawField.toLowerCase();
 
           if (field === "message") {
             setError("root", { message: "// error: something went wrong" });
             return;
           }
-          setError(field as keyof RegisterFormData, {
-            message: `// error: ${message}`,
-          });
+
+          if (allowed.includes(field as keyof RegisterFormData))
+            setError(field as keyof RegisterFormData, {
+              message: `// error: ${rawMessage}`,
+            });
         });
         return;
       }
