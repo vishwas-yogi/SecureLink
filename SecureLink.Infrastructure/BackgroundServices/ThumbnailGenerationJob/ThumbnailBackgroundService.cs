@@ -54,7 +54,6 @@ public class ThumbnailBackgroundService(
         try
         {
             _logger.LogInformation("Processing thumbnail for file: {fileId}", job.FileId);
-            // TODO: add cancellation token to the download method
             using var originalFile = await storageService.Download(job.StorageKey);
             using var thumbStream = await thumbnailService.CreateThumbnail(originalFile);
 

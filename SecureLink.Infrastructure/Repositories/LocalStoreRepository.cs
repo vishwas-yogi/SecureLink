@@ -13,9 +13,15 @@ public class LocalStoreRepository(
     private readonly ILogger<LocalStoreRepository> _logger = logger;
     private readonly StorageOptions _options =
         options.Value
-        ?? throw new ArgumentNullException(nameof(options), "StorageOptions must be configured.");
+        ?? throw new ArgumentNullException(
+            nameof(options.Value.UploadDirectory),
+            "StorageOptions UploadDirectory must be configured."
+        );
 
-    public async Task<string> Upload(Stream file, string storageKey)
+    public async Task<string> Upload(
+        Stream file,
+        string storageKey
+    )
     {
         var outputFilePath = GetFullFilePath(storageKey);
         await RemoveFileIfExists(outputFilePath);
@@ -81,7 +87,7 @@ public class LocalStoreRepository(
 
     private string GetOutputDir()
     {
-        string outDir = Path.Combine(_options.UploadDirectory, "uploads");
+        string outDir = Path.Combine(_options.UploadDirectory ?? "", "uploads");
         if (!Directory.Exists(outDir))
         {
             Directory.CreateDirectory(outDir);

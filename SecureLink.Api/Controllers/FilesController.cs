@@ -105,7 +105,9 @@ public class FilesController(
     [AllowAnonymous] // TODO: Add signed urls later
     [HttpGet]
     [Route("thumbnail/{thumbKey}")]
-    public async Task<ActionResult> DownloadThumbnail([FromRoute] string thumbKey)
+    public async Task<ActionResult> DownloadThumbnail(
+        [FromRoute] string thumbKey
+    )
     {
         _logger.LogInformation(
             "Controller DownloadThumbnail invoked with Request: {Request}",

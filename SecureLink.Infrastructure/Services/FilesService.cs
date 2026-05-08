@@ -1,10 +1,8 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using SecureLink.Core;
 using SecureLink.Core.Contracts;
-using SecureLink.Core.Entities;
 using SecureLink.Infrastructure.Contracts;
 using SecureLink.Infrastructure.Helpers;
 
@@ -184,13 +182,15 @@ public class FilesService(
             );
         }
 
-        var fileValidation = await _validator.ValidateFileForDownload(file.Filename);
-        // Although it is in validator for now, but it checks the storage existenece
-        // So instead of retuning validation error, returning 404 for now
-        if (!fileValidation.IsValid)
-            return ServiceResult<FileDownloadServiceResponse, FileDownloadErrorDetails>.NotFound(
-                fileValidation.Error!
-            );
+        // This validation no more required for `R2StorageService`.
+
+        // var fileValidation = await _validator.ValidateFileForDownload(file.Filename);
+        // // Although it is in validator for now, but it checks the storage existenece
+        // // So instead of retuning validation error, returning 404 for now
+        // if (!fileValidation.IsValid)
+        //     return ServiceResult<FileDownloadServiceResponse, FileDownloadErrorDetails>.NotFound(
+        //         fileValidation.Error!
+        //     );
 
         try
         {
@@ -215,9 +215,10 @@ public class FilesService(
         string thumbKey
     )
     {
-        var fileValidation = await _validator.ValidateFileForDownload(thumbKey);
-        if (!fileValidation.IsValid)
-            return ServiceResult<Stream, FileDownloadErrorDetails>.NotFound(fileValidation.Error!);
+        // Not required in case of
+        // var fileValidation = await _validator.ValidateFileForDownload(thumbKey);
+        // if (!fileValidation.IsValid)
+        //     return ServiceResult<Stream, FileDownloadErrorDetails>.NotFound(fileValidation.Error!);
 
         try
         {
