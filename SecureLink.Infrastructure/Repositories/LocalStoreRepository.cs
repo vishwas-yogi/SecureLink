@@ -20,8 +20,7 @@ public class LocalStoreRepository(
 
     public async Task<string> Upload(
         Stream file,
-        string storageKey,
-        CancellationToken cancellationToken
+        string storageKey
     )
     {
         var outputFilePath = GetFullFilePath(storageKey);
@@ -38,11 +37,11 @@ public class LocalStoreRepository(
 
         using FileStream outputStream = new(outputFilePath, options);
 
-        await file.CopyToAsync(outputStream, cancellationToken);
+        await file.CopyToAsync(outputStream);
         return outputFilePath;
     }
 
-    public Task<Stream> Download(string storageKey, CancellationToken cancellationToken)
+    public Task<Stream> Download(string storageKey)
     {
         _logger.LogInformation("Starting download of the file: {filename}", storageKey);
         var filePath = GetFullFilePath(storageKey);

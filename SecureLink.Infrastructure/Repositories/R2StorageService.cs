@@ -21,7 +21,7 @@ public class R2StorageService(
 
     private readonly ILogger<R2StorageService> _logger = logger;
 
-    public async Task<Stream> Download(string storageKey, CancellationToken cancellationToken)
+    public async Task<Stream> Download(string storageKey)
     {
         _logger.LogInformation("Starting download of the file from R2: {filename}", storageKey);
 
@@ -29,7 +29,7 @@ public class R2StorageService(
         {
             var request = new GetObjectRequest { BucketName = _options.Bucket, Key = storageKey };
 
-            var response = await _client.GetObjectAsync(request, cancellationToken);
+            var response = await _client.GetObjectAsync(request);
 
             _logger.LogInformation(
                 "Returned network stream for file from R2: {filename}",
@@ -72,28 +72,27 @@ public class R2StorageService(
         return Task.FromResult(true);
     }
 
-    public async Task<string> Upload(
-        Stream file,
-        string storageKey,
-        CancellationToken cancellationToken
-    )
+    public async Task<string> Upload(Stream file, string storageKey)
     {
         try
         {
             _logger.LogInformation("Upload starting for key: {key}", storageKey);
+            using var fileStream = new MemoryStream();
+            await file.CopyToAsync(fileStream);
+            fileStream.Position = 0;
 
             var request = new PutObjectRequest
             {
                 BucketName = _options.Bucket,
                 Key = storageKey,
-                InputStream = file,
+                InputStream = fileStream,
 
                 // For R2 compatibility
                 DisablePayloadSigning = true,
                 DisableDefaultChecksumValidation = true,
             };
 
-            await _client.PutObjectAsync(request, cancellationToken);
+            await _client.PutObjectAsync(request);
             _logger.LogInformation("Upload completed for key: {key}", storageKey);
             return storageKey;
         }

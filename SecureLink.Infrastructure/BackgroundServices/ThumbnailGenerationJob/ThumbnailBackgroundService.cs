@@ -54,12 +54,12 @@ public class ThumbnailBackgroundService(
         try
         {
             _logger.LogInformation("Processing thumbnail for file: {fileId}", job.FileId);
-            using var originalFile = await storageService.Download(job.StorageKey, token);
+            using var originalFile = await storageService.Download(job.StorageKey);
             using var thumbStream = await thumbnailService.CreateThumbnail(originalFile);
 
             var thumbFilename = $"{Path.GetFileNameWithoutExtension(job.Filename)}_thumbnail";
             var thumbKey = $"{Guid.NewGuid()}.webp";
-            await storageService.Upload(thumbStream, thumbKey, token);
+            await storageService.Upload(thumbStream, thumbKey);
 
             // Update the thumbKey to db
             await filesRepository.UpdateMetadata(job.FileId, thumbKey);

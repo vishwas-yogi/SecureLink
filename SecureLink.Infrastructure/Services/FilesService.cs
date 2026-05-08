@@ -25,8 +25,7 @@ public class FilesService(
     public async Task<ServiceResult<List<FileUploadResponse>, FileUploadErrorDetails>> Upload(
         string boundary,
         Stream uploadedFileStream,
-        Guid currentUser,
-        CancellationToken cancellationToken
+        Guid currentUser
     )
     {
         List<FileUploadResponse> results = [];
@@ -34,7 +33,7 @@ public class FilesService(
         MultipartSection? section;
         long totalBytesRead = 0;
 
-        while ((section = await reader.ReadNextSectionAsync(cancellationToken)) != null)
+        while ((section = await reader.ReadNextSectionAsync()) != null)
         {
             var contentDispositionHeader = section.GetContentDispositionHeader();
             var contentType = section.ContentType;
@@ -59,7 +58,7 @@ public class FilesService(
                 byte[] header = new byte[32];
                 // Used 32 bytes for peeking
                 // As some files like MP4 has its identifying marker slightly offset
-                int bytesRead = await bufferedStream.ReadAsync(header.AsMemory(0, 32), cancellationToken);
+                int bytesRead = await bufferedStream.ReadAsync(header.AsMemory(0, 32));
 
                 var originalFileName = contentDispositionHeader!.FileName.Value;
                 response.Filename = originalFileName;
@@ -100,7 +99,6 @@ public class FilesService(
                     {
                         RepoRequest = repoRequest,
                         FileStream = bufferedStream,
-                        CancellationToken = cancellationToken,
                     }
                 );
 
@@ -171,7 +169,7 @@ public class FilesService(
 
     public async Task<
         ServiceResult<FileDownloadServiceResponse, FileDownloadErrorDetails>
-    > Download(Guid fileId, Guid currentUserId, CancellationToken cancellationToken)
+    > Download(Guid fileId, Guid currentUserId)
     {
         var file = await _filesRepository.Get(
             new FileGetRepoRequest { Id = fileId, Owner = currentUserId }
@@ -196,7 +194,7 @@ public class FilesService(
 
         try
         {
-            var fileStream = await _storageService.Download(file.Filename, cancellationToken);
+            var fileStream = await _storageService.Download(file.Filename);
             return ServiceResult<FileDownloadServiceResponse, FileDownloadErrorDetails>.Success(
                 new FileDownloadServiceResponse
                 {
@@ -214,17 +212,17 @@ public class FilesService(
     }
 
     public async Task<ServiceResult<Stream, FileDownloadErrorDetails>> DownloadThumbnail(
-        string thumbKey,
-        CancellationToken cancellationToken
+        string thumbKey
     )
     {
-        var fileValidation = await _validator.ValidateFileForDownload(thumbKey);
-        if (!fileValidation.IsValid)
-            return ServiceResult<Stream, FileDownloadErrorDetails>.NotFound(fileValidation.Error!);
+        // Not required in case of
+        // var fileValidation = await _validator.ValidateFileForDownload(thumbKey);
+        // if (!fileValidation.IsValid)
+        //     return ServiceResult<Stream, FileDownloadErrorDetails>.NotFound(fileValidation.Error!);
 
         try
         {
-            var fileStream = await _storageService.Download(thumbKey, cancellationToken);
+            var fileStream = await _storageService.Download(thumbKey);
             return ServiceResult<Stream, FileDownloadErrorDetails>.Success(fileStream);
         }
         catch (FileNotFoundException)
@@ -293,8 +291,7 @@ public class FilesService(
 
             string storedKey = await _storageService.Upload(
                 request.FileStream,
-                request.RepoRequest.Filename,
-                request.CancellationToken
+                request.RepoRequest.Filename
             );
             if (string.IsNullOrEmpty(storedKey))
                 return ServiceResult<
@@ -362,7 +359,6 @@ public class FilesService(
     {
         public required FilePersistRepoRequest RepoRequest { get; init; }
         public required Stream FileStream { get; init; }
-        public required CancellationToken CancellationToken { get; init; }
     }
 
     private record FilePersistInternalResponse
