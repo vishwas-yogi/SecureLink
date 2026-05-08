@@ -1,10 +1,8 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using SecureLink.Core;
 using SecureLink.Core.Contracts;
-using SecureLink.Core.Entities;
 using SecureLink.Infrastructure.Contracts;
 using SecureLink.Infrastructure.Helpers;
 
@@ -27,7 +25,8 @@ public class FilesService(
     public async Task<ServiceResult<List<FileUploadResponse>, FileUploadErrorDetails>> Upload(
         string boundary,
         Stream uploadedFileStream,
-        Guid currentUser
+        Guid currentUser,
+        CancellationToken cancellationToken
     )
     {
         List<FileUploadResponse> results = [];
@@ -35,7 +34,7 @@ public class FilesService(
         MultipartSection? section;
         long totalBytesRead = 0;
 
-        while ((section = await reader.ReadNextSectionAsync()) != null)
+        while ((section = await reader.ReadNextSectionAsync(cancellationToken)) != null)
         {
             var contentDispositionHeader = section.GetContentDispositionHeader();
             var contentType = section.ContentType;
@@ -60,7 +59,7 @@ public class FilesService(
                 byte[] header = new byte[32];
                 // Used 32 bytes for peeking
                 // As some files like MP4 has its identifying marker slightly offset
-                int bytesRead = await bufferedStream.ReadAsync(header.AsMemory(0, 32));
+                int bytesRead = await bufferedStream.ReadAsync(header.AsMemory(0, 32), cancellationToken);
 
                 var originalFileName = contentDispositionHeader!.FileName.Value;
                 response.Filename = originalFileName;
@@ -101,6 +100,7 @@ public class FilesService(
                     {
                         RepoRequest = repoRequest,
                         FileStream = bufferedStream,
+                        CancellationToken = cancellationToken,
                     }
                 );
 
@@ -171,7 +171,7 @@ public class FilesService(
 
     public async Task<
         ServiceResult<FileDownloadServiceResponse, FileDownloadErrorDetails>
-    > Download(Guid fileId, Guid currentUserId)
+    > Download(Guid fileId, Guid currentUserId, CancellationToken cancellationToken)
     {
         var file = await _filesRepository.Get(
             new FileGetRepoRequest { Id = fileId, Owner = currentUserId }
@@ -184,17 +184,19 @@ public class FilesService(
             );
         }
 
-        var fileValidation = await _validator.ValidateFileForDownload(file.Filename);
-        // Although it is in validator for now, but it checks the storage existenece
-        // So instead of retuning validation error, returning 404 for now
-        if (!fileValidation.IsValid)
-            return ServiceResult<FileDownloadServiceResponse, FileDownloadErrorDetails>.NotFound(
-                fileValidation.Error!
-            );
+        // This validation no more required for `R2StorageService`.
+
+        // var fileValidation = await _validator.ValidateFileForDownload(file.Filename);
+        // // Although it is in validator for now, but it checks the storage existenece
+        // // So instead of retuning validation error, returning 404 for now
+        // if (!fileValidation.IsValid)
+        //     return ServiceResult<FileDownloadServiceResponse, FileDownloadErrorDetails>.NotFound(
+        //         fileValidation.Error!
+        //     );
 
         try
         {
-            var fileStream = await _storageService.Download(file.Filename);
+            var fileStream = await _storageService.Download(file.Filename, cancellationToken);
             return ServiceResult<FileDownloadServiceResponse, FileDownloadErrorDetails>.Success(
                 new FileDownloadServiceResponse
                 {
@@ -212,7 +214,8 @@ public class FilesService(
     }
 
     public async Task<ServiceResult<Stream, FileDownloadErrorDetails>> DownloadThumbnail(
-        string thumbKey
+        string thumbKey,
+        CancellationToken cancellationToken
     )
     {
         var fileValidation = await _validator.ValidateFileForDownload(thumbKey);
@@ -221,7 +224,7 @@ public class FilesService(
 
         try
         {
-            var fileStream = await _storageService.Download(thumbKey);
+            var fileStream = await _storageService.Download(thumbKey, cancellationToken);
             return ServiceResult<Stream, FileDownloadErrorDetails>.Success(fileStream);
         }
         catch (FileNotFoundException)
@@ -290,7 +293,8 @@ public class FilesService(
 
             string storedKey = await _storageService.Upload(
                 request.FileStream,
-                request.RepoRequest.Filename
+                request.RepoRequest.Filename,
+                request.CancellationToken
             );
             if (string.IsNullOrEmpty(storedKey))
                 return ServiceResult<
@@ -358,6 +362,7 @@ public class FilesService(
     {
         public required FilePersistRepoRequest RepoRequest { get; init; }
         public required Stream FileStream { get; init; }
+        public required CancellationToken CancellationToken { get; init; }
     }
 
     private record FilePersistInternalResponse

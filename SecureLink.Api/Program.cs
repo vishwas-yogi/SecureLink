@@ -1,7 +1,9 @@
 using System.Text;
 using System.Text.Json.Serialization;
+using Amazon.S3;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using SecureLink.Core.Contracts;
@@ -65,10 +67,21 @@ builder.Services.AddScoped<IFilesService, FilesService>();
 // TODO: check on implementing a interface instead of directly injecting validator
 builder.Services.AddScoped<FilesValidator>();
 
-// TODO: Add an S3 storage service as well.
-// Update: I'll only add S3 / R2 when the server has some traffic.
+// Storage related files
 builder.Services.Configure<StorageOptions>(builder.Configuration.GetSection("Storage"));
-builder.Services.AddSingleton<IStorageService, LocalStoreRepository>();
+
+builder.Services.AddSingleton<IAmazonS3>(sp =>
+{
+    var storageOptions = sp.GetRequiredService<IOptions<StorageOptions>>().Value;
+
+    return new AmazonS3Client(
+        storageOptions.AccessKey,
+        storageOptions.SecretKey,
+        new AmazonS3Config { ServiceURL = storageOptions.Endpoint, ForcePathStyle = true } // R2 requires ForcePathStyle
+    );
+});
+
+builder.Services.AddSingleton<IStorageService, R2StorageService>();
 builder.Services.Configure<DapperOptions>(builder.Configuration.GetSection("Dapper"));
 builder.Services.AddSingleton<IDapperContext, DapperContext>();
 builder.Services.AddScoped<IFilesRepository, FilesRepository>();

@@ -22,7 +22,9 @@ public class FilesController(
 
     [HttpPost]
     [Route("")]
-    public async Task<ActionResult<List<FileUploadResponse>>> Upload()
+    public async Task<ActionResult<List<FileUploadResponse>>> Upload(
+        CancellationToken cancellationToken
+    )
     {
         var currentUser = User.GetUserId();
         if (currentUser is null)
@@ -45,7 +47,12 @@ public class FilesController(
         {
             return BadRequest("Boundary can't be null");
         }
-        var response = await _fileService.Upload(boundary, Request.Body, currentUser.Value);
+        var response = await _fileService.Upload(
+            boundary,
+            Request.Body,
+            currentUser.Value,
+            cancellationToken
+        );
 
         if (!response.IsSuccess)
         {
@@ -61,7 +68,10 @@ public class FilesController(
 
     [HttpGet]
     [Route("{fileId}")]
-    public async Task<ActionResult> Download([FromRoute] Guid fileId)
+    public async Task<ActionResult> Download(
+        [FromRoute] Guid fileId,
+        CancellationToken cancellationToken
+    )
     {
         var currentUser = User.GetUserId();
         if (currentUser is null)
@@ -71,7 +81,7 @@ public class FilesController(
 
         _logger.LogInformation("Controller DownloadFile invoked with Request: {Request}", Request);
 
-        var response = await _fileService.Download(fileId, currentUser.Value);
+        var response = await _fileService.Download(fileId, currentUser.Value, cancellationToken);
 
         if (!response.IsSuccess)
         {
@@ -105,14 +115,17 @@ public class FilesController(
     [AllowAnonymous] // TODO: Add signed urls later
     [HttpGet]
     [Route("thumbnail/{thumbKey}")]
-    public async Task<ActionResult> DownloadThumbnail([FromRoute] string thumbKey)
+    public async Task<ActionResult> DownloadThumbnail(
+        [FromRoute] string thumbKey,
+        CancellationToken cancellationToken
+    )
     {
         _logger.LogInformation(
             "Controller DownloadThumbnail invoked with Request: {Request}",
             Request
         );
 
-        var response = await _fileService.DownloadThumbnail(thumbKey);
+        var response = await _fileService.DownloadThumbnail(thumbKey, cancellationToken);
 
         if (!response.IsSuccess)
         {
