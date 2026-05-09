@@ -6,6 +6,7 @@ from .helpers import config, options
 
 settings = options.options
 
+
 # load the model before the app starts receiving requests
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -14,20 +15,21 @@ async def lifespan(app: FastAPI):
     config.load_models()
 
     app.state.http_client = httpx.AsyncClient(
-        base_url=settings.internal_api_url,
+        base_url=settings.internal__apiurl,
         timeout=httpx.Timeout(10.0),
-        headers={"X-Internal-Key": settings.internal_api_key}
+        headers={"X-Internal-Key": settings.internal__apikey},
     )
-    
+
     yield
 
     print("App shutting down...")
     await app.state.http_client.aclose()
-    
+
 
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(images.router)
+
 
 @app.get("/")
 def root():
