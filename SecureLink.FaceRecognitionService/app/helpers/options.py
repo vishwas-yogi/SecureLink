@@ -10,7 +10,7 @@ class Options(BaseSettings):
     storage__accesskey: str = ""
     storage__secretkey: str = ""
 
-    model_config = SettingsConfigDict(env_file="../.env", extra="ignore")
+    model_config = SettingsConfigDict(extra="ignore")
 
 
 options = Options()
