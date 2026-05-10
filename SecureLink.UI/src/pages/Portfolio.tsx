@@ -33,7 +33,7 @@ const adventures = [
   {
     icon: "🗺️",
     title: "TRAVEL",
-    description: "Explored 12 countries. Lost luggage twice. Worth it.",
+    description: "Explored 5 countries. Lost luggage once. Worth it.",
   },
   {
     icon: "🏃",
