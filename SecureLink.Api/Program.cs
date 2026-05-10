@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Amazon.S3;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
@@ -95,7 +96,8 @@ builder.Services.AddHttpClient(
     "embedding",
     (serviceProvider, client) =>
     {
-        client.BaseAddress = new Uri("http://localhost:8000");
+        var options = serviceProvider.GetRequiredService<IOptions<InternalApiOptions>>().Value;
+        client.BaseAddress = new Uri(options.Url);
     }
 );
 
@@ -121,7 +123,7 @@ builder.Services.AddScoped<IEmbeddingsService, EmbeddingsService>();
 builder.Services.AddScoped<IEmbeddingsRepository, EmbeddingsRepository>();
 
 // Internal Api Key options
-builder.Services.Configure<InternalApiOptions>(builder.Configuration.GetSection("InternalApiKey"));
+builder.Services.Configure<InternalApiOptions>(builder.Configuration.GetSection("InternalApi"));
 
 builder.WebHost.ConfigureKestrel(options =>
 {
@@ -177,5 +179,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 
 app.Run();

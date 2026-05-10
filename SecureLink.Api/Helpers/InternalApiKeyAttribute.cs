@@ -12,7 +12,7 @@ public class InternalApiKeyFilter(IOptions<InternalApiOptions> options) : IAsync
 
     public Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
-        if (string.IsNullOrWhiteSpace(_options.ApiKey))
+        if (string.IsNullOrWhiteSpace(_options.Key))
         {
             context.Result = new StatusCodeResult(500);
             return Task.CompletedTask;
@@ -29,7 +29,7 @@ public class InternalApiKeyFilter(IOptions<InternalApiOptions> options) : IAsync
             return Task.CompletedTask;
         }
 
-        if (key != _options.ApiKey)
+        if (key != _options.Key)
         {
             context.Result = new UnauthorizedObjectResult(
                 new { message = "Invalid internal API key" }

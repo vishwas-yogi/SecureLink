@@ -1,0 +1,72 @@
+services:
+  dotnet-api:
+    build:
+        context: .
+        dockerfile: SecureLink.Api/Dockerfile
+    image: ghcr.io/vishwas-yogi/securelink-api:latest
+    container_name: securelink-api
+    ports:
+      - "5009:5009"
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_HTTP_PORTS=5009
+      - JwtSettings__SecretKey=${JwtSettings__SecretKey}
+      - Dapper__ConnectionString=${Dapper__ConnectionString}
+      - InternalApi__Key=${Internal__ApiKey}
+      - InternalApi__Url=http://python-worker:8000
+      - Storage__Bucket=${Storage__Bucket}
+      - Storage__AccessKey=${Storage__AccessKey}
+      - Storage__SecretKey=${Storage__SecretKey}
+      - Storage__Endpoint=${Storage__Endpoint}
+    networks:
+      - securelink-network
+
+  python-worker:
+    build:
+        context: SecureLink.FaceRecognitionService
+        dockerfile: Dockerfile
+    image: ghcr.io/vishwas-yogi/securelink-python:latest
+    container_name: securelink-python
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    environment:
+      - Dotnet__BaseUrl=http://dotnet-api:5009
+      - Internal__ApiKey=${Internal__ApiKey}
+      - Storage__Bucket=${Storage__Bucket}
+      - Storage__AccessKey=${Storage__AccessKey}
+      - Storage__SecretKey=${Storage__SecretKey}
+      - Storage__Endpoint=${Storage__Endpoint}
+    networks:
+      - securelink-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: securelink-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      # - certbot-certs:/etc/letsencrypt:ro
+      # - certbot-www:/var/www/certbot:ro
+    depends_on:
+      - dotnet-api
+    networks:
+      - securelink-network
+
+  # Add certbot after getting a domain
+  # certbot:
+  #   image: certbot/certbot
+  #   volumes:
+  #     - certbot-certs:/etc/letsencrypt
+  #     - certbot-www:/var/www/certbot
+
+# volumes:
+  # certbot-certs:
+  # certbot-www:
+
+networks:
+  securelink-network:
+    driver: bridge
