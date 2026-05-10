@@ -16,3 +16,7 @@ docker image prune -f
 
 echo "Deployment Successful!"
 docker compose -f docker-compose.yml -f docker-compose.production.yml ps
+
+echo "Performing disk cleanup..."
+# This ensures we don't leave any "ghost" layers behind after the new version is up
+docker image prune -a -f
