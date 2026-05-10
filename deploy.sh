@@ -1,21 +1,18 @@
 #!/bin/bash
 set -e
 
-echo "Deploying SecureLink..."
+echo "Starting SecureLink Deployment..."
 cd ~/securelink
 
-echo "Pulling latest images..."
+echo "Pulling latest images from GHCR..."
+# This ensures we have the latest .NET and Python images before starting
 docker compose -f docker-compose.yml -f docker-compose.production.yml pull
 
-echo "Restarting services..."
-docker compose -f docker-compose.yml -f docker-compose.production.yml up -d --no-deps dotnet-api
-docker compose -f docker-compose.yml -f docker-compose.production.yml up -d --no-deps python-worker
+echo "Recreating containers..."
+docker compose -f docker-compose.yml -f docker-compose.production.yml up -d --remove-orphans
 
-echo "Reloading nginx..."
-docker compose exec nginx nginx -s reload
-
-echo "Cleaning old images..."
+echo "Cleaning up old, unused image layers..."
 docker image prune -f
 
-echo "Done!"
+echo "Deployment Successful!"
 docker compose -f docker-compose.yml -f docker-compose.production.yml ps
