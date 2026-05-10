@@ -18,25 +18,15 @@ const projects = [
     link: "/securelink",
   },
   {
-    id: "devops-dashboard",
-    name: "DEVOPS_DASH",
-    tagline: "Monitor all the things.",
+    id: "imartty",
+    name: "ImarTTY",
+    tagline: "Your terminal assistant",
     description:
-      "Real-time infrastructure monitoring with beautiful terminal aesthetics.",
-    tags: ["Go", "React", "Prometheus", "Grafana"],
+      "Contextful terminal assistant watching over your terminal",
+    tags: ["Python", "Textual"],
     featured: false,
     link: "#",
-  },
-  {
-    id: "code-collab",
-    name: "CODE_COLLAB",
-    tagline: "Pair program from anywhere.",
-    description:
-      "Real-time collaborative code editor with video chat integration.",
-    tags: ["Node.js", "WebRTC", "Monaco", "Redis"],
-    featured: false,
-    link: "#",
-  },
+  }
 ];
 
 const adventures = [
