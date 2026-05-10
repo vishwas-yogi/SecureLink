@@ -39,7 +39,7 @@ jobs:
       - name: Build and push Python Worker
         uses: docker/build-push-action@v5
         with:
-          context: ./python-worker
+          context: ./SecureLink.FaceRecognitionService
           push: true
           tags: ${{ env.PYTHON_IMAGE }}:latest
 
