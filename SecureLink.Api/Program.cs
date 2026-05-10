@@ -1,8 +1,10 @@
+using System.Net;
 using System.Text;
 using System.Text.Json.Serialization;
 using Amazon.S3;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
@@ -95,7 +97,8 @@ builder.Services.AddHttpClient(
     "embedding",
     (serviceProvider, client) =>
     {
-        client.BaseAddress = new Uri("http://localhost:8000");
+        var options = serviceProvider.GetRequiredService<IOptions<InternalApiOptions>>().Value;
+        client.BaseAddress = new Uri(options.Url);
     }
 );
 
@@ -121,7 +124,7 @@ builder.Services.AddScoped<IEmbeddingsService, EmbeddingsService>();
 builder.Services.AddScoped<IEmbeddingsRepository, EmbeddingsRepository>();
 
 // Internal Api Key options
-builder.Services.Configure<InternalApiOptions>(builder.Configuration.GetSection("InternalApiKey"));
+builder.Services.Configure<InternalApiOptions>(builder.Configuration.GetSection("InternalApi"));
 
 builder.WebHost.ConfigureKestrel(options =>
 {
@@ -167,6 +170,18 @@ if (app.Environment.IsDevelopment() || args.Contains("--migrate"))
     if (args.Contains("--migrate"))
         return; // Exit after migrations, don't start the server
 }
+
+var forwardedOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+};
+
+forwardedOptions.KnownIPNetworks.Clear();
+forwardedOptions.KnownProxies.Clear();
+
+forwardedOptions.KnownProxies.Add(IPAddress.Parse("172.20.0.5"));
+
+app.UseForwardedHeaders(forwardedOptions);
 
 app.UseHttpsRedirection();
 

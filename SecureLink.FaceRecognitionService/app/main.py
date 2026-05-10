@@ -15,7 +15,7 @@ async def lifespan(app: FastAPI):
     config.load_models()
 
     app.state.http_client = httpx.AsyncClient(
-        base_url=settings.internal__apiurl,
+        base_url=settings.dotnet__baseurl,
         timeout=httpx.Timeout(10.0),
         headers={"X-Internal-Key": settings.internal__apikey},
     )
