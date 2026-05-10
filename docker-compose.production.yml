@@ -1,0 +1,7 @@
+# docker-compose.production.yml — overrides for production
+services:
+  dotnet-api:
+    ports: []  # remove port exposure
+
+  python-worker:
+    ports: []  # remove port exposure

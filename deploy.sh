@@ -5,14 +5,17 @@ echo "Deploying SecureLink..."
 cd ~/securelink
 
 echo "Pulling latest images..."
-docker compose pull
+docker compose -f docker-compose.yml -f docker-compose.production.yml pull
 
 echo "Restarting services..."
-docker compose up -d --no-deps dotnet-api
-docker compose up -d --no-deps python-worker
+docker compose -f docker-compose.yml -f docker-compose.production.yml up -d --no-deps dotnet-api
+docker compose -f docker-compose.yml -f docker-compose.production.yml up -d --no-deps python-worker
+
+echo "Reloading nginx..."
+docker compose exec nginx nginx -s reload
 
 echo "Cleaning old images..."
 docker image prune -f
 
 echo "Done!"
-docker compose ps
+docker compose -f docker-compose.yml -f docker-compose.production.yml ps
