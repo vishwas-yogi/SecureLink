@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
-    "format": "prettier --write ."
+    "preview": "npm run build && wrangler dev",
+    "format": "prettier --write .",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -27,6 +28,7 @@
     "zod": "^4.4.2"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.36.3",
     "@tailwindcss/postcss": "^4.2.0",
     "@types/node": "^22",
     "@types/react": "^19",
@@ -34,6 +36,7 @@
     "postcss": "^8.5",
     "prettier": "3.8.3",
     "tailwindcss": "^4.2.0",
-    "typescript": "5.7.3"
+    "typescript": "5.7.3",
+    "wrangler": "^4.90.0"
   }
 }
