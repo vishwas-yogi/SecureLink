@@ -54,7 +54,8 @@ services:
     depends_on:
       - dotnet-api
     networks:
-      - securelink-network
+      securelink-network:
+        ipv4_address: 172.20.0.5 # Assign a static IP within the subnet
 
   # Add certbot after getting a domain
   # certbot:
@@ -70,3 +71,6 @@ services:
 networks:
   securelink-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24  # Defines the range 172.20.0.1 to 172.20.0.254

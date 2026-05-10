@@ -18,4 +18,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN python -c "from deepface import DeepFace; DeepFace.build_model('Facenet512')"
 
 COPY . .
+
+# TODO: Add a non priveledged user
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

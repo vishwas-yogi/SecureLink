@@ -22,4 +22,6 @@ RUN dotnet publish "SecureLink.Api.csproj" -c Release -o /app/publish /p:UseAppH
 FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
+
+# TODO: Add a non priveledged user
 ENTRYPOINT ["dotnet", "SecureLink.Api.dll"]

@@ -171,11 +171,17 @@ if (app.Environment.IsDevelopment() || args.Contains("--migrate"))
         return; // Exit after migrations, don't start the server
 }
 
-app.UseForwardedHeaders(new ForwardedHeadersOptions
+var forwardedOptions = new ForwardedHeadersOptions
 {
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
-    KnownIPNetworks = { new System.Net.IPNetwork(IPAddress.Parse("172.16.0.0"), 12) } // Docker network range
-});
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+};
+
+forwardedOptions.KnownIPNetworks.Clear();
+forwardedOptions.KnownProxies.Clear();
+
+forwardedOptions.KnownProxies.Add(IPAddress.Parse("172.20.0.5"));
+
+app.UseForwardedHeaders(forwardedOptions);
 
 app.UseHttpsRedirection();
 
