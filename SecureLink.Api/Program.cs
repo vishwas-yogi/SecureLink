@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text;
 using System.Text.Json.Serialization;
 using Amazon.S3;
@@ -170,6 +171,12 @@ if (app.Environment.IsDevelopment() || args.Contains("--migrate"))
         return; // Exit after migrations, don't start the server
 }
 
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+    KnownIPNetworks = { new System.Net.IPNetwork(IPAddress.Parse("172.16.0.0"), 12) } // Docker network range
+});
+
 app.UseHttpsRedirection();
 
 app.UseCors("AllowSecureLinkFrontend");
@@ -179,10 +186,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.UseForwardedHeaders(new ForwardedHeadersOptions
-{
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-});
 
 app.Run();
