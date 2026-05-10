@@ -221,7 +221,7 @@ SecureLink/
 
 - In-memory Channel queue does not survive process restarts — jobs in flight are lost on crash. Designed to be replaced with Redis Streams or a persistent queue.
 - Similarity threshold (0.45 cosine) is tuned empirically on a small dataset — may need adjustment for diverse lighting conditions or image quality.
-- No multi-tenancy or group sharing yet — each user searches only their own uploaded photos.
+- No multi-tenancy or group sharing yet, each user searches only their own uploaded photos.
 - Python worker models are loaded at startup and kept in memory — cold start after inactivity takes ~10-15 seconds on first request.
 
 ---
