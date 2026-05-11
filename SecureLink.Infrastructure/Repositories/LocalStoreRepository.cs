@@ -18,10 +18,7 @@ public class LocalStoreRepository(
             "StorageOptions UploadDirectory must be configured."
         );
 
-    public async Task<string> Upload(
-        Stream file,
-        string storageKey
-    )
+    public async Task<string> Upload(Stream file, string storageKey)
     {
         var outputFilePath = GetFullFilePath(storageKey);
         await RemoveFileIfExists(outputFilePath);
