@@ -28,7 +28,11 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-                .WithOrigins("https://securelink.vishwas-yogi-swarnkar.workers.dev")
+                .WithOrigins(
+                    "http://localhost:5173",
+                    "https://vishwas-yogi.dev",
+                    "https://www.vishwas-yogi.dev"
+                )
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
@@ -173,7 +177,7 @@ if (app.Environment.IsDevelopment() || args.Contains("--migrate"))
 
 var forwardedOptions = new ForwardedHeadersOptions
 {
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
 };
 
 forwardedOptions.KnownIPNetworks.Clear();

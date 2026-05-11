@@ -18,11 +18,20 @@ Built as a portfolio project to explore distributed systems, async pipelines, an
 ## Architecture
 
 ```
-React Frontend (Cloudflare Pages)
+React Frontend
+  vishwas-yogi.dev  (Cloudflare Pages)
         │
-        │ HTTP
+        │ HTTPS
         ▼
-    Nginx (reverse proxy)
+Cloudflare Tunnel (SSL termination, DDoS protection)
+  api.vishwas-yogi.dev
+        │
+        │ HTTP (internal, secure tunnel)
+        ▼
+GCP e2-medium VM
+        │
+        ▼
+Nginx (reverse proxy, port 80)
         │
         ▼
   .NET 10 API

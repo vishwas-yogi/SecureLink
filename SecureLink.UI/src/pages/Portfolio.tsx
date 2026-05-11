@@ -21,17 +21,16 @@ const projects = [
     id: "imartty",
     name: "ImarTTY",
     tagline: "Your terminal assistant",
-    description:
-      "Contextful terminal assistant watching over your terminal",
+    description: "Contextful terminal assistant watching over your terminal",
     tags: ["Python", "Textual"],
     featured: false,
-    link: "#",
-  }
+    link: "https://imartty-demo.onrender.com/",
+  },
 ];
 
 const adventures = [
   {
-    icon: "🗺️",
+    icon: "✈️",
     title: "TRAVEL",
     description: "Explored 5 countries. Lost luggage once. Worth it.",
   },
@@ -42,7 +41,7 @@ const adventures = [
       "Half marathons completed: 3. Full marathons: still loading...",
   },
   {
-    icon: "⛰️",
+    icon: "🏔️",
     title: "TREKKING",
     description: "Conquered peaks, conquered bugs. Same energy.",
   },
