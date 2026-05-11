@@ -183,11 +183,13 @@ var forwardedOptions = new ForwardedHeadersOptions
 forwardedOptions.KnownIPNetworks.Clear();
 forwardedOptions.KnownProxies.Clear();
 
+// Docker
 forwardedOptions.KnownProxies.Add(IPAddress.Parse("172.20.0.5"));
 
 app.UseForwardedHeaders(forwardedOptions);
 
-app.UseHttpsRedirection();
+// Removing this as cloudflare tunnel handles it
+// app.UseHttpsRedirection();
 
 app.UseCors("AllowSecureLinkFrontend");
 
