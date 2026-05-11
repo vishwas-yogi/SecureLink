@@ -123,7 +123,7 @@ export default function Portfolio() {
                 </p>
                 <p className="font-mono text-secondary mt-4">
                   <TypewriterText
-                    text="Currently: Looking for my next quest 🗺️"
+                    text="Currently: Looking for my next quest 🪎️"
                     delay={2500}
                   />
                 </p>
@@ -258,7 +258,8 @@ export default function Portfolio() {
               Want the full story? Get the PDF.
             </p>
             <a
-              href="#"
+              href="/Vishwas_Yogi_Resume.pdf"
+              download="Vishwas_Yogi_Resume.pdf"
               className="font-mono text-sm text-background bg-primary hover:bg-primary/90 px-6 py-3 inline-block glow-primary transition-all"
             >
               [ DOWNLOAD CV ]

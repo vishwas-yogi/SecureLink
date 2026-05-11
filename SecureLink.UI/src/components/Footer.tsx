@@ -8,7 +8,7 @@ export default function Footer() {
           </p>
           <div className="flex items-center gap-4">
             <a
-              href="https://github.com"
+              href="https://github.com/vishwas-yogi"
               target="_blank"
               rel="noopener noreferrer"
               className="font-mono text-sm text-muted hover:text-primary transition-colors border border-border px-3 py-1 hover:border-primary hover:glow-primary"
@@ -16,7 +16,7 @@ export default function Footer() {
               [ GITHUB ]
             </a>
             <a
-              href="https://linkedin.com"
+              href="https://www.linkedin.com/in/vishwas-yogi/"
               target="_blank"
               rel="noopener noreferrer"
               className="font-mono text-sm text-muted hover:text-primary transition-colors border border-border px-3 py-1 hover:border-primary hover:glow-primary"
